@@ -1,0 +1,112 @@
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import Dashboard from './components/Dashboard';
+import LoadingSkeleton from './components/common/LoadingSkeleton';
+import { LanguageProvider } from './context/LanguageContext';
+
+// Dynamic Code-Splitting / Lazy Loading for Heavy Modules
+const CourseManager = lazy(() => import('./components/CourseManager'));
+const FlashcardBuilder = lazy(() => import('./components/FlashcardBuilder'));
+const WorksheetGenerator = lazy(() => import('./components/WorksheetGenerator'));
+const EssayGrader = lazy(() => import('./components/EssayGrader'));
+const AIImporter = lazy(() => import('./components/AIImporter'));
+const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard setActiveTab={setActiveTab} />;
+      case 'courseManager':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="grid" />}>
+            <CourseManager setActiveTab={setActiveTab} />
+          </Suspense>
+        );
+      case 'flashcard':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="split" />}>
+            <FlashcardBuilder />
+          </Suspense>
+        );
+      case 'worksheet':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="split" />}>
+            <WorksheetGenerator />
+          </Suspense>
+        );
+      case 'essay':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="split" />}>
+            <EssayGrader />
+          </Suspense>
+        );
+      case 'aiImporter':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="split" />}>
+            <AIImporter setActiveTab={setActiveTab} />
+          </Suspense>
+        );
+      case 'planner':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="split" />}>
+            <LessonPlanner />
+          </Suspense>
+        );
+      default:
+        return <Dashboard setActiveTab={setActiveTab} />;
+    }
+  };
+
+  return (
+    <LanguageProvider>
+      <div className="flex h-screen overflow-hidden bg-background">
+        {/* Navigation Sidebar */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          openSettings={() => setIsSettingsOpen(true)}
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header
+            isDarkMode={isDarkMode}
+            setIsDarkMode={setIsDarkMode}
+            openSettings={() => setIsSettingsOpen(true)}
+          />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            {renderContent()}
+          </main>
+        </div>
+
+        {/* Lazy Loaded Settings Modal */}
+        {isSettingsOpen && (
+          <Suspense fallback={null}>
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+            />
+          </Suspense>
+        )}
+      </div>
+    </LanguageProvider>
+  );
+}
