@@ -22,6 +22,58 @@ export const setStoredApiKey = (key) => {
 };
 
 /**
+ * Core Gemini API caller with exponential backoff retry
+ * Handles 503 (server overload) and 429 (rate limit) automatically
+ */
+const GEMINI_MODEL = 'gemini-flash-latest';
+
+export const geminiRequest = async (prompt, { jsonMode = false, maxRetries = 3 } = {}) => {
+  const apiKey = getStoredApiKey();
+  if (!apiKey) throw new Error('No API key configured');
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: jsonMode
+      ? { responseMimeType: 'application/json', temperature: 0.3 }
+      : { temperature: 0.7 }
+  });
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('Empty AI response from Gemini');
+      return text;
+    }
+
+    // 429 or 503 — parse retry-after hint if available, then backoff
+    if ((res.status === 429 || res.status === 503) && attempt < maxRetries) {
+      const errBody = await res.json().catch(() => ({}));
+      const retryMsg = errBody?.error?.message || '';
+      const retrySeconds = parseFloat(retryMsg.match(/retry in (\d+(\.\d+)?)s/i)?.[1] || 0);
+      const waitMs = retrySeconds > 0
+        ? retrySeconds * 1000
+        : Math.min(1000 * 2 ** attempt + Math.random() * 500, 20000);
+      console.warn(`Gemini ${res.status} — retrying in ${(waitMs / 1000).toFixed(1)}s (attempt ${attempt + 1}/${maxRetries})`);
+      await new Promise(r => setTimeout(r, waitMs));
+      continue;
+    }
+
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message || `Gemini API error: ${res.status}`);
+  }
+
+  throw new Error('Gemini API unavailable after maximum retries');
+};
+
+/**
  * Generate AI Lesson Plan
  */
 export const generateLessonPlan = async ({ topic, cefrLevel, ageGroup, duration, method }) => {
@@ -84,28 +136,8 @@ Return JSON format with the following structure:
   ]
 }`;
 
-    const headers = { 'Content-Type': 'application/json' };
-    if (apiKey.startsWith('AQ.') || apiKey.startsWith('ya29.')) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
-    headers['x-goog-api-key'] = apiKey;
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    });
-
-    if (!res.ok) {
-      throw new Error(`API Error: ${res.statusText}`);
-    }
-
-    const data = await res.json();
-    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    return JSON.parse(responseText);
+    const rawText = await geminiRequest(prompt, { jsonMode: true });
+    return JSON.parse(rawText);
   } catch (err) {
     console.warn("AI API request failed, falling back to Smart Mock Engine:", err.message);
     return getMockLessonPlan({ topic, cefrLevel, ageGroup, duration, method });
@@ -171,28 +203,8 @@ Return ONLY valid JSON matching this schema:
 }`;
 
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (apiKey.startsWith('AQ.') || apiKey.startsWith('ya29.')) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
-    headers['x-goog-api-key'] = apiKey;
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.3 }
-      })
-    });
-
-    if (!res.ok) throw new Error(`Gemini API returned ${res.status}`);
-    const data = await res.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) throw new Error("Empty AI response");
-
+    const rawText = await geminiRequest(prompt, { jsonMode: true });
     const parsed = JSON.parse(rawText);
-
     return {
       title: parsed.title || `Worksheet: ${topic} (${cefrLevel})`,
       cefrLevel: parsed.cefrLevel || cefrLevel,
@@ -249,24 +261,7 @@ Return JSON:
   "improvedParagraph": "Rewritten upgraded paragraph with advanced vocabulary"
 }`;
 
-    const headers = { 'Content-Type': 'application/json' };
-    if (apiKey.startsWith('AQ.') || apiKey.startsWith('ya29.')) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
-    headers['x-goog-api-key'] = apiKey;
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    });
-
-    if (!res.ok) throw new Error("API failed");
-    const data = await res.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const raw = await geminiRequest(prompt, { jsonMode: true });
     const parsed = JSON.parse(raw);
     return {
       overallBand: parsed.overallBand || parsed.overallScore || '6.5',
@@ -315,18 +310,8 @@ Return JSON array:
   }
 ]`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    });
-
-    if (!res.ok) throw new Error("API Error");
-    const data = await res.json();
-    return JSON.parse(data.candidates[0].content.parts[0].text);
+    const raw = await geminiRequest(prompt, { jsonMode: true });
+    return JSON.parse(raw);
   } catch (err) {
     return getMockFlashcards(topic);
   }
@@ -384,18 +369,7 @@ Requirements:
 
 Respond ONLY with valid JSON conforming to this schema.`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    });
-
-    if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
-    const data = await res.json();
-    const rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const rawContent = await geminiRequest(prompt, { jsonMode: true });
     const parsed = JSON.parse(rawContent);
 
     // Normalize response
