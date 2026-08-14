@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { 
   UploadCloud, CheckCircle, Sparkles, Loader2, ArrowRight, 
   PlayCircle, Tv, FileText, Download, RotateCcw, BookOpen, 
-  Layers, Check, Copy, FileUp, X, FileCode
+  Layers, Check, Copy, FileUp, X, FileCode, Brain, SpellCheck, PenTool, FolderPlus
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateLessonFromText } from '../services/aiService';
 import InteractiveLesson from './InteractiveLesson';
 import ClassroomPresenter from './ClassroomPresenter';
+import AILoadingOverlay from './AILoadingOverlay';
+import { useAIStore } from '../store/useAIStore';
 import { exportToAnkiCsv, exportLessonToWordDoc } from '../utils/exportUtils';
 import { parseUploadedFile } from '../utils/fileParser';
 import { soundFX } from '../services/soundEffects';
@@ -150,18 +152,39 @@ GRAMMAR: First Conditional with Business Modal Verbs
 export default function AIImporter({ setActiveTab }) {
   const { t, lang } = useLanguage();
   const samplePresets = lang === 'en' ? SAMPLE_PRESETS_EN : SAMPLE_PRESETS_VI;
-  const [text, setText] = useState('');
+
+  // Connect to Zustand store
+  const {
+    importerParams,
+    setImporterParams,
+    importerData: generatedLesson,
+    setImporterData: setGeneratedLesson,
+    savedLessons,
+    saveLesson
+  } = useAIStore();
+
+  const { text } = importerParams;
+
+  const isSaved = generatedLesson && savedLessons.some(l => l.id === generatedLesson.id);
+
   const [inputMode, setInputMode] = useState('paste');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [generatedLesson, setGeneratedLesson] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showPresenter, setShowPresenter] = useState(false);
   const [error, setError] = useState('');
   const [isReadingFile, setIsReadingFile] = useState(false);
   const fileInputRef = useRef(null);
+
+  const IMPORTER_STEPS = [
+    { icon: FileText,   labelKey: 'aiStepParseText' },
+    { icon: BookOpen,   labelKey: 'aiStepExtractVocab' },
+    { icon: Layers,     labelKey: 'aiStepBuildGrammar' },
+    { icon: PenTool,    labelKey: 'aiStepGenPractice' },
+  ];
+
 
   const handleProcess = async () => {
     if (!text.trim()) return;
@@ -181,9 +204,9 @@ export default function AIImporter({ setActiveTab }) {
     }
   };
 
-  const handleApplyPreset = (presetContent) => {
-    setText(presetContent);
-    setUploadedFile(null);
+  const handleLoadSample = (presetContent) => {
+    setImporterParams({ text: presetContent });
+    setInputMode('paste');
     setError('');
     soundFX.playFlip();
   };
@@ -196,7 +219,10 @@ export default function AIImporter({ setActiveTab }) {
 
     try {
       const cleanContent = await parseUploadedFile(file);
-      setText(cleanContent);
+      if (cleanContent) {
+        setImporterParams({ text: cleanContent });
+        setInputMode('paste');
+      }
       soundFX.playFlip();
     } catch (err) {
       setError(err.message || 'Failed to read document file');
@@ -239,8 +265,8 @@ export default function AIImporter({ setActiveTab }) {
     }
   };
 
-  const reset = () => {
-    setText('');
+  const handleReset = () => {
+    setImporterParams({ text: '' });
     setUploadedFile(null);
     setIsSuccess(false);
     setGeneratedLesson(null);
@@ -259,6 +285,13 @@ export default function AIImporter({ setActiveTab }) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto px-1 sm:px-4">
+      <AILoadingOverlay
+        isVisible={isProcessing}
+        steps={IMPORTER_STEPS}
+        title={t('aiLoadingTitle')}
+        subtitle={t('aiLoadingSubtitle')}
+        estimatedSeconds={12}
+      />
       {/* Header Banner */}
       <div className="text-center mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-3 text-emerald-600 dark:text-emerald-500 flex items-center justify-center gap-2.5">
@@ -284,7 +317,7 @@ export default function AIImporter({ setActiveTab }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => handleApplyPreset(preset.content)}
+                    onClick={() => handleLoadSample(preset.content)}
                     className="rounded-lg text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-800 transition-all border-emerald-200 dark:border-emerald-800/60 h-8 px-2.5"
                   >
                     + {t(preset.labelKey)}
@@ -332,8 +365,8 @@ export default function AIImporter({ setActiveTab }) {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => setText('')} 
-                      className="text-xs text-muted-foreground hover:text-destructive h-7 px-2"
+                      onClick={() => setImporterParams({ text: '' })} 
+                      className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 -mr-2"
                     >
                       <RotateCcw size={12} className="mr-1" /> {t('impClearBtn')}
                     </Button>
@@ -341,7 +374,7 @@ export default function AIImporter({ setActiveTab }) {
                 </div>
                 <Textarea
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => setImporterParams({ text: e.target.value })}
                   placeholder={t('impPlaceholder')}
                   disabled={isProcessing}
                   className="w-full min-h-[260px] sm:min-h-[320px] p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed resize-y bg-secondary/30 focus-visible:bg-background border-2 border-dashed border-border/80 focus-visible:border-emerald-500 rounded-xl transition-all duration-300"
@@ -444,7 +477,7 @@ export default function AIImporter({ setActiveTab }) {
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
-                    <Loader2 size={18} className="animate-spin" /> {t('impProcessing')}
+                    {t('impProcessing')}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
@@ -477,11 +510,23 @@ export default function AIImporter({ setActiveTab }) {
                   </div>
                 </div>
 
-                <div className="w-full sm:w-auto flex justify-end shrink-0">
+                <div className="w-full sm:w-auto flex flex-col sm:flex-row justify-end gap-2 shrink-0">
+                  <Button
+                    variant={isSaved ? "secondary" : "default"}
+                    size="sm"
+                    onClick={() => saveLesson(generatedLesson)}
+                    disabled={isSaved}
+                    className={`w-full sm:w-auto rounded-xl font-semibold h-9 ${
+                      isSaved ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                    }`}
+                  >
+                    {isSaved ? <CheckCircle size={15} className="mr-1.5" /> : <FolderPlus size={15} className="mr-1.5" />} 
+                    {isSaved ? t('impSaved') : t('impSaveToCourse')}
+                  </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={reset} 
+                    onClick={handleReset} 
                     className="w-full sm:w-auto rounded-xl font-semibold border-border/80 hover:bg-secondary h-9"
                   >
                     <RotateCcw size={15} className="mr-1.5" /> {t('impAnotherBtn')}

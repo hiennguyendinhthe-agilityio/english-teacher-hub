@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GraduationCap, Sparkles, AlertCircle, CheckCircle2, AlertTriangle, ArrowRight, Lightbulb, Dices, BookOpen, Award, Check } from 'lucide-react';
+import { PenTool, Sparkles, CheckCircle2, AlertCircle, AlertTriangle, TrendingUp, RefreshCw, BookOpen, FileText, CheckSquare, Zap, Eye, Target, ListChecks, PenLine, GraduationCap, ArrowRight, Lightbulb, Dices, Award, Check } from 'lucide-react';
 import { gradeEssay } from '../services/aiService';
 import { useLanguage } from '../context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,6 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import AILoadingOverlay from './AILoadingOverlay';
+import { useAIStore } from '../store/useAIStore';
 import { cn } from '@/lib/utils';
 
 const SAMPLE_ESSAYS = [
@@ -45,10 +48,25 @@ const WRITING_PROMPTS = [
 
 export default function EssayGrader() {
   const { t } = useLanguage();
-  const [essayText, setEssayText] = useState(SAMPLE_ESSAYS[0].text);
-  const [gradingScale, setGradingScale] = useState('IELTS Writing Band (1.0 - 9.0)');
+  
+  // Connect to Zustand store
+  const {
+    essayParams,
+    setEssayParams,
+    essayFeedback: feedback,
+    setEssayFeedback: setFeedback
+  } = useAIStore();
+
+  const { essayText, gradingScale } = essayParams;
+
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null);
+
+  const ESSAY_STEPS = [
+    { icon: FileText,   labelKey: 'aiStepReadEssay' },
+    { icon: Target,     labelKey: 'aiStepScoreBands' },
+    { icon: ListChecks, labelKey: 'aiStepFindErrors' },
+    { icon: PenLine,    labelKey: 'aiStepRewrite' },
+  ];
 
   const wordCount = essayText.trim() ? essayText.trim().split(/\s+/).length : 0;
   const sentenceCount = essayText.trim() ? essayText.split(/[.!?]+/).filter(Boolean).length : 0;
@@ -69,14 +87,13 @@ export default function EssayGrader() {
   };
 
   const handleLoadSample = (sample) => {
-    setEssayText(sample.text);
-    setGradingScale(sample.scale);
+    setEssayParams({ essayText: sample.text, gradingScale: sample.scale });
     setFeedback(null);
   };
 
   const handleRandomPrompt = () => {
     const prompt = WRITING_PROMPTS[Math.floor(Math.random() * WRITING_PROMPTS.length)];
-    setEssayText(`Topic: "${prompt}"\n\n`);
+    setEssayParams({ essayText: `Topic: "${prompt}"\n\n` });
     setFeedback(null);
   };
 
@@ -90,6 +107,13 @@ export default function EssayGrader() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
+      <AILoadingOverlay
+        isVisible={loading}
+        steps={ESSAY_STEPS}
+        title={t('aiLoadingTitle')}
+        subtitle={t('aiLoadingSubtitle')}
+        estimatedSeconds={14}
+      />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 mb-2 text-foreground flex-wrap">
@@ -153,7 +177,7 @@ export default function EssayGrader() {
             <form onSubmit={handleSubmit} className="space-y-4 pt-2 border-t border-border/50">
               <div className="space-y-2">
                 <Label className="text-foreground/80 font-semibold">{t('essaySystemLabel')}</Label>
-                <Select value={gradingScale} onValueChange={setGradingScale}>
+                <Select value={gradingScale} onValueChange={(val) => setEssayParams({ gradingScale: val })}>
                   <SelectTrigger className="bg-white dark:bg-background border-amber-200">
                     <SelectValue placeholder={t('essayScalePlaceholder')} />
                   </SelectTrigger>
@@ -176,7 +200,7 @@ export default function EssayGrader() {
                 </div>
                 <Textarea
                   value={essayText}
-                  onChange={(e) => setEssayText(e.target.value)}
+                  onChange={(e) => setEssayParams({ essayText: e.target.value })}
                   placeholder={t('essayPlaceholder')}
                   required
                   className="min-h-[260px] resize-y bg-white dark:bg-background border-amber-200 focus-visible:ring-amber-500 leading-relaxed text-sm font-sans"
@@ -189,7 +213,7 @@ export default function EssayGrader() {
                 className="w-full mt-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold h-12 rounded-xl shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 text-base gap-2"
               >
                 {loading ? (
-                  <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> {t('essayGrading')}</span>
+                  <span className="flex items-center gap-2">{t('essayGrading')}</span>
                 ) : (
                   <span className="flex items-center gap-2"><Sparkles size={18} /> {t('essaySubmitBtn')}</span>
                 )}
@@ -200,19 +224,7 @@ export default function EssayGrader() {
 
         {/* Feedback Output Column */}
         <div className="xl:col-span-7">
-          {loading ? (
-            <Card className="p-10 flex flex-col items-center justify-center min-h-[440px] border-amber-100 bg-white/50 backdrop-blur-sm animate-pulse h-full">
-              <div className="w-16 h-16 rounded-full bg-amber-100 mb-6 flex items-center justify-center">
-                <GraduationCap size={32} className="text-amber-400" />
-              </div>
-              <div className="h-6 w-3/4 bg-amber-100/50 rounded-md mb-4" />
-              <div className="h-4 w-1/2 bg-amber-100/50 rounded-md mb-8" />
-              <div className="space-y-3 w-full max-w-lg">
-                <div className="h-24 w-full bg-secondary/60 rounded-lg" />
-                <div className="h-24 w-full bg-secondary/60 rounded-lg" />
-              </div>
-            </Card>
-          ) : feedback ? (
+          {feedback ? (
             <div className="space-y-6">
               {/* Overall Score & Criteria Overview */}
               <Card className="bg-white dark:bg-secondary/20 shadow-md border-amber-100 dark:border-amber-900/30 overflow-hidden">

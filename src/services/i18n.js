@@ -48,11 +48,13 @@ export const translations = {
     // ── Course Manager ──
     cmTitle: "Khóa Học & Bài Giảng",
     cmSub: "Khám phá các Unit bài học tương tác: Từ vựng, Ngữ pháp, Game & Luyện tập.",
+    cmSavedLessonsTitle: "Bài Giảng Của Tôi (Tạo bởi AI)",
     cmImportBtn: "Nhập Bài Mới (AI)",
     cmMins: "phút",
     cmVocabs: "từ vựng",
     cmEnterLesson: "Vào Bài Học",
     cmComingSoon: "Sắp ra mắt...",
+    cmDeleteLesson: "Xóa Bài Giảng",
 
     // ── Interactive Lesson ──
     ilPresenterBtn: "Trình Chiếu TV / Projector",
@@ -126,6 +128,8 @@ export const translations = {
     impVocabCount: "từ vựng",
     impGrammarCount: "chủ điểm ngữ pháp",
     impPracticeCount: "câu hỏi trắc nghiệm",
+    impSaveToCourse: "Lưu Vào Khóa Học",
+    impSaved: "Đã Lưu Khóa Học!",
     impAnotherBtn: "Nhập Bài Khác",
     impPreviewBtn: "Vào Học Bài Giảng",
     impSamplesTitle: "Mẫu Giáo Án Nhanh:",
@@ -161,6 +165,40 @@ export const translations = {
     plannerSubmitBtn: "Tạo Giáo Án Ngay",
     plannerBuilding: "Đang Soạn Giáo Án...",
     plannerReadyBadge: "Sẵn Sàng Cho Lớp Học",
+
+    // ── AI Loading Overlay (shared) ──
+    aiLoadingTitle: "Trợ Lý AI Đang Xử Lý",
+    aiLoadingSubtitle: "Vui lòng chờ trong giây lát",
+    aiLoadingActive: "Đang xử lý",
+    aiLoadingDone: "Xong",
+    aiLoadingEstimate: "Còn ước tính: ",
+    aiLoadingAlmost: "Gần xong, đang hoàn thiện...",
+    // Lesson Planner steps
+    aiStepAnalyzeTopic: "Phân tích chủ đề & trình độ CEFR",
+    aiStepDesignObj: "Thiết kế mục tiêu bài học",
+    aiStepBuildStages: "Xây dựng các giai đoạn giảng dạy",
+    aiStepGenVocab: "Tổng hợp từ vựng & ngữ pháp trọng tâm",
+    aiStepFinalize: "Hoàn thiện & kiểm tra cấu trúc",
+    // Worksheet steps
+    aiStepReadTopic: "Đọc hiểu chủ đề & loại bài tập",
+    aiStepDraftPassage: "Soạn thảo đoạn văn bản",
+    aiStepGenQuestions: "Tạo câu hỏi trắc nghiệm",
+    aiStepVerifyAnswers: "Kiểm tra đáp án & giải thích",
+    // Essay steps
+    aiStepReadEssay: "Đọc và phân tích bài viết",
+    aiStepScoreBands: "Chấm điểm theo tiêu chí IELTS",
+    aiStepFindErrors: "Phát hiện lỗi ngữ pháp & từ vựng",
+    aiStepRewrite: "Viết lại đoạn văn nâng cao",
+    // Importer steps
+    aiStepParseText: "Bóc tách nội dung tài liệu",
+    aiStepExtractVocab: "Trích xuất danh sách từ vựng",
+    aiStepBuildGrammar: "Xây dựng cấu trúc ngữ pháp",
+    aiStepGenPractice: "Tạo câu hỏi luyện tập",
+    // Flashcard steps
+    aiStepResearchWords: "Tra cứu từ vựng theo chủ đề",
+    aiStepAddIPA: "Thêm phiên âm IPA & phần từ loại",
+    aiStepGenExamples: "Tạo câu ví dụ minh họa",
+
     plannerObjectives: "Mục Tiêu Bài Học",
     plannerTargetVocab: "Từ Vựng Trọng Tâm",
     plannerGrammarFocus: "Ngữ Pháp Trọng Tâm",
@@ -306,12 +344,14 @@ export const translations = {
 
     // ── Course Manager ──
     cmTitle: "Courses & Lessons",
-    cmSub: "Explore interactive Unit lessons: Vocabulary, Grammar, Match Game & Practice.",
-    cmImportBtn: "Import New Lesson",
+    cmSub: "Explore interactive lesson units: Vocabulary, Grammar, Games & Practice.",
+    cmSavedLessonsTitle: "My AI Lessons",
+    cmImportBtn: "Import New (AI)",
     cmMins: "mins",
-    cmVocabs: "Vocabs",
+    cmVocabs: "words",
     cmEnterLesson: "Enter Lesson",
     cmComingSoon: "Coming soon...",
+    cmDeleteLesson: "Delete Lesson",
 
     // ── Interactive Lesson ──
     ilPresenterBtn: "TV / Projector Mode",
@@ -385,8 +425,10 @@ export const translations = {
     impVocabCount: "vocabulary words",
     impGrammarCount: "grammar topics",
     impPracticeCount: "practice questions",
+    impSaveToCourse: "Save to Course",
+    impSaved: "Saved to Course!",
     impAnotherBtn: "Import Another",
-    impPreviewBtn: "Start Interactive Lesson",
+    impPreviewBtn: "Preview Lesson",
     impSamplesTitle: "Quick Sample Presets:",
     impSample1: "Unit 6: Community Service",
     impSample2: "AI & Future Technology",
@@ -420,6 +462,40 @@ export const translations = {
     plannerSubmitBtn: "Generate Lesson Plan",
     plannerBuilding: "Building Lesson Plan...",
     plannerReadyBadge: "Ready for Class",
+
+    // ── AI Loading Overlay (shared) ──
+    aiLoadingTitle: "AI Assistant Processing",
+    aiLoadingSubtitle: "Please wait a moment",
+    aiLoadingActive: "Processing",
+    aiLoadingDone: "Done",
+    aiLoadingEstimate: "Estimated remaining: ",
+    aiLoadingAlmost: "Almost done, finalizing...",
+    // Lesson Planner steps
+    aiStepAnalyzeTopic: "Analyzing topic & CEFR level",
+    aiStepDesignObj: "Designing learning objectives",
+    aiStepBuildStages: "Building teaching stages",
+    aiStepGenVocab: "Generating vocabulary & grammar focus",
+    aiStepFinalize: "Finalizing & validating structure",
+    // Worksheet steps
+    aiStepReadTopic: "Reading topic & worksheet type",
+    aiStepDraftPassage: "Drafting reading passage",
+    aiStepGenQuestions: "Generating MCQ questions",
+    aiStepVerifyAnswers: "Verifying answers & explanations",
+    // Essay steps
+    aiStepReadEssay: "Reading & analyzing the essay",
+    aiStepScoreBands: "Scoring against IELTS criteria",
+    aiStepFindErrors: "Identifying grammar & vocabulary errors",
+    aiStepRewrite: "Rewriting improved paragraph",
+    // Importer steps
+    aiStepParseText: "Parsing document content",
+    aiStepExtractVocab: "Extracting vocabulary list",
+    aiStepBuildGrammar: "Building grammar structure",
+    aiStepGenPractice: "Generating practice questions",
+    // Flashcard steps
+    aiStepResearchWords: "Researching topic vocabulary",
+    aiStepAddIPA: "Adding IPA phonetics & parts of speech",
+    aiStepGenExamples: "Generating example sentences",
+
     plannerObjectives: "Learning Objectives",
     plannerTargetVocab: "Target Vocabulary",
     plannerGrammarFocus: "Grammar Focus",

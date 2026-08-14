@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { FileText, Sparkles, Copy, Check, Printer, PenTool, CheckSquare, Dices, Lightbulb, CheckCircle2, XCircle } from 'lucide-react';
-import { generateWorksheet } from '../services/aiService';
 import { useLanguage } from '../context/LanguageContext';
+import { FileText, Sparkles, Copy, Check, Printer, PenTool, CheckSquare, Dices, Lightbulb, CheckCircle2, XCircle, Brain, BookOpen, ListChecks, ShieldCheck } from 'lucide-react';
+import { generateWorksheet } from '../services/aiService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import AILoadingOverlay from './AILoadingOverlay';
+import { useAIStore } from '../store/useAIStore';
 
 const SUGGESTED_TOPICS = [
   { label: 'Unit 1: My New School', level: 'A2', type: 'Vocabulary Fill-in-the-blanks', icon: '🏫' },
@@ -26,27 +28,57 @@ const RANDOM_PROMPTS = [
   { topic: 'Present Perfect vs. Past Simple Tense Mastery', level: 'B1', type: 'Grammar Multiple Choice' },
   { topic: 'Urbanization and Smart Cities of 2050', level: 'B2', type: 'Reading Passage & Comprehension Questions' },
   { topic: 'Healthy Daily Habits and Mental Wellness', level: 'A2', type: 'Vocabulary Fill-in-the-blanks' },
-  { topic: 'Renewable Energy: Solar and Wind Power', level: 'B2', type: 'Reading Passage & Comprehension Questions' }
+  { topic: 'Job Interview & Professional Workplace', level: 'C1', type: 'Reading Passage & Comprehension Questions' }
 ];
+
+const cleanQuestionPrompt = (rawPrompt) => {
+  let prompt = (rawPrompt || "").trim();
+  // Clean up messy prefixes like "1. Question 1 [A2]: Fill in the blank: "
+  prompt = prompt
+    .replace(/^(?:\d+\.\s*)?(?:Question\s*\d+.*?:\s*|Q\d+:\s*)/i, '')
+    .replace(/^(?:\[[A-Z0-9]+\]\s*:?\s*)/i, '')
+    .replace(/^(?:Fill in the blank[s]?\s*:?\s*)/i, '')
+    .replace(/^[-:.]\s*/, '')
+    .trim();
+  // Remove wrapping quotes if present
+  if (prompt.startsWith('"') && prompt.endsWith('"')) {
+    prompt = prompt.slice(1, -1);
+  }
+  return prompt;
+};
 
 export default function WorksheetGenerator() {
   const { t } = useLanguage();
-  const [topic, setTopic] = useState('Unit 1: My New School');
-  const [cefrLevel, setCefrLevel] = useState('A2');
-  const [type, setType] = useState('Vocabulary Fill-in-the-blanks');
-  const [questionCount, setQuestionCount] = useState(5);
+  
+  // Connect to Zustand store
+  const {
+    worksheetParams,
+    setWorksheetParams,
+    worksheetData: worksheet,
+    setWorksheetData: setWorksheet,
+    worksheetAnswers: userAnswers,
+    setWorksheetAnswer,
+    resetWorksheetAnswers
+  } = useAIStore();
+
+  const { topic, cefrLevel, type, questionCount } = worksheetParams;
   
   const [loading, setLoading] = useState(false);
-  const [worksheet, setWorksheet] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [userAnswers, setUserAnswers] = useState({});
+
+  const WORKSHEET_STEPS = [
+    { icon: Brain,       labelKey: 'aiStepReadTopic' },
+    { icon: BookOpen,    labelKey: 'aiStepDraftPassage' },
+    { icon: ListChecks,  labelKey: 'aiStepGenQuestions' },
+    { icon: ShieldCheck, labelKey: 'aiStepVerifyAnswers' },
+  ];
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!topic.trim()) return;
     
     setLoading(true);
-    setUserAnswers({});
+    resetWorksheetAnswers();
     try {
       const res = await generateWorksheet({ topic, cefrLevel, type, questionCount });
       setWorksheet(res);
@@ -58,30 +90,31 @@ export default function WorksheetGenerator() {
   };
 
   const handleApplyTopic = (item) => {
-    setTopic(item.label || item.topic);
-    setCefrLevel(item.level);
-    setType(item.type);
+    setWorksheetParams({
+      topic: item.label || item.topic,
+      cefrLevel: item.level,
+      type: item.type
+    });
   };
 
   const handleRandomize = () => {
     const randomItem = RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)];
-    setTopic(randomItem.topic);
-    setCefrLevel(randomItem.level);
-    setType(randomItem.type);
+    setWorksheetParams({
+      topic: randomItem.topic,
+      cefrLevel: randomItem.level,
+      type: randomItem.type
+    });
   };
 
   const handleSelectOption = (questionIdx, opt) => {
-    setUserAnswers(prev => ({
-      ...prev,
-      [questionIdx]: opt
-    }));
+    setWorksheetAnswer(questionIdx, opt);
   };
 
   const handleCopy = () => {
     if (!worksheet) return;
     let text = `WORKSHEET: ${worksheet.title}\n\n`;
     if (worksheet.readingPassage) text += `PASSAGE:\n${worksheet.readingPassage}\n\n`;
-    text += `QUESTIONS:\n${worksheet.questions.map((q, i) => `${i+1}. ${q.question || q.questionText}\n${q.options.map(o => `   - ${o}`).join('\n')}`).join('\n\n')}\n\n`;
+    text += `QUESTIONS:\n${worksheet.questions.map((q, i) => `${i+1}. ${cleanQuestionPrompt(q.question || q.questionText)}\n${q.options.map(o => `   - ${o}`).join('\n')}`).join('\n\n')}\n\n`;
     text += `ANSWER KEY:\n${worksheet.questions.map((q, i) => `${i+1}. ${q.answer || q.correctAnswer}`).join('\n')}`;
     
     navigator.clipboard.writeText(text);
@@ -91,6 +124,13 @@ export default function WorksheetGenerator() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
+      <AILoadingOverlay
+        isVisible={loading}
+        steps={WORKSHEET_STEPS}
+        title={t('aiLoadingTitle')}
+        subtitle={t('aiLoadingSubtitle')}
+        estimatedSeconds={16}
+      />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 mb-2 text-foreground flex-wrap">
@@ -158,7 +198,7 @@ export default function WorksheetGenerator() {
                 <Input
                   id="ws-topic"
                   value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
+                  onChange={(e) => setWorksheetParams({ topic: e.target.value })}
                   placeholder={t('wsTopicPlaceholder')}
                   required
                   className="bg-white dark:bg-background border-emerald-200 focus-visible:ring-emerald-500 font-medium"
@@ -168,7 +208,7 @@ export default function WorksheetGenerator() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label className="text-foreground/80 font-semibold">{t('wsCefrLabel')}</Label>
-                  <Select value={cefrLevel} onValueChange={setCefrLevel}>
+                  <Select value={cefrLevel} onValueChange={(val) => setWorksheetParams({ cefrLevel: val })}>
                     <SelectTrigger className="bg-white dark:bg-background border-emerald-200">
                       <SelectValue placeholder={t('wsCefrPlaceholder')} />
                     </SelectTrigger>
@@ -182,7 +222,7 @@ export default function WorksheetGenerator() {
 
                 <div className="space-y-2">
                   <Label className="text-foreground/80 font-semibold">{t('wsQuestionCount')}</Label>
-                  <Select value={String(questionCount)} onValueChange={(val) => setQuestionCount(Number(val))}>
+                  <Select value={String(questionCount)} onValueChange={(val) => setWorksheetParams({ questionCount: Number(val) })}>
                     <SelectTrigger className="bg-white dark:bg-background border-emerald-200">
                       <SelectValue />
                     </SelectTrigger>
@@ -198,7 +238,7 @@ export default function WorksheetGenerator() {
 
               <div className="space-y-2">
                 <Label className="text-foreground/80 font-semibold">{t('wsFormatLabel')}</Label>
-                <Select value={type} onValueChange={setType}>
+                <Select value={type} onValueChange={(val) => setWorksheetParams({ type: val })}>
                   <SelectTrigger className="bg-white dark:bg-background border-emerald-200">
                     <SelectValue placeholder={t('wsFormatPlaceholder')} />
                   </SelectTrigger>
@@ -216,7 +256,7 @@ export default function WorksheetGenerator() {
                 className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5 text-base gap-2"
               >
                 {loading ? (
-                  <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> {t('wsGenerating')}</span>
+                  <span className="flex items-center gap-2">{t('wsGenerating')}</span>
                 ) : (
                   <span className="flex items-center gap-2"><Sparkles size={18} /> {t('wsSubmitBtn')}</span>
                 )}
@@ -227,20 +267,7 @@ export default function WorksheetGenerator() {
 
         {/* Output Area */}
         <div className="xl:col-span-7">
-          {loading ? (
-            <Card className="p-10 flex flex-col items-center justify-center min-h-[440px] border-emerald-100 bg-white/50 backdrop-blur-sm animate-pulse">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 mb-6 flex items-center justify-center">
-                <FileText size={32} className="text-emerald-400" />
-              </div>
-              <div className="h-6 w-3/4 bg-emerald-100/50 rounded-md mb-4" />
-              <div className="h-4 w-1/2 bg-emerald-100/50 rounded-md mb-8" />
-              <div className="space-y-3 w-full max-w-lg">
-                <div className="h-16 w-full bg-secondary/60 rounded-lg" />
-                <div className="h-16 w-full bg-secondary/60 rounded-lg" />
-                <div className="h-16 w-full bg-secondary/60 rounded-lg" />
-              </div>
-            </Card>
-          ) : worksheet ? (
+          {worksheet ? (
             <div className="space-y-6">
               {/* Student Worksheet */}
               <Card className="printable-document bg-white dark:bg-secondary/20 shadow-md border-emerald-100 dark:border-emerald-900/30 overflow-hidden">
@@ -280,7 +307,7 @@ export default function WorksheetGenerator() {
                     </h4>
                     <div className="space-y-6">
                       {worksheet.questions.map((q, idx) => {
-                        const questionPrompt = q.question || q.questionText;
+                        const questionPrompt = cleanQuestionPrompt(q.question || q.questionText);
                         const correctAnswer = q.answer || q.correctAnswer;
                         const selectedOpt = userAnswers[idx];
 

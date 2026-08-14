@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { BookOpen, Sparkles, Copy, Check, Printer, Clock, Target } from 'lucide-react';
-import { generateLessonPlan } from '../services/aiService';
 import { useLanguage } from '../context/LanguageContext';
+import { BookOpen, Sparkles, Copy, Check, Printer, Clock, Target, Brain, FileText, Layers, ListChecks } from 'lucide-react';
+import { generateLessonPlan } from '../services/aiService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,18 +9,32 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import AILoadingOverlay from './AILoadingOverlay';
+import { useAIStore } from '../store/useAIStore';
 
 export default function LessonPlanner() {
   const { t } = useLanguage();
-  const [topic, setTopic] = useState('Job Interview Preparation');
-  const [cefrLevel, setCefrLevel] = useState('B2');
-  const [ageGroup, setAgeGroup] = useState('Adults');
-  const [duration, setDuration] = useState('45');
-  const [method, setMethod] = useState('PPP Framework');
+  
+  // Connect to Zustand store
+  const { 
+    plannerParams, 
+    setPlannerParams, 
+    plannerData: plan, 
+    setPlannerData: setPlan 
+  } = useAIStore();
+
+  const { topic, cefrLevel, ageGroup, duration, method } = plannerParams;
   
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  const PLANNER_STEPS = [
+    { icon: Brain,      labelKey: 'aiStepAnalyzeTopic' },
+    { icon: Target,     labelKey: 'aiStepDesignObj' },
+    { icon: Layers,     labelKey: 'aiStepBuildStages' },
+    { icon: BookOpen,   labelKey: 'aiStepGenVocab' },
+    { icon: ListChecks, labelKey: 'aiStepFinalize' },
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,6 +61,13 @@ export default function LessonPlanner() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <AILoadingOverlay
+        isVisible={loading}
+        steps={PLANNER_STEPS}
+        title={t('aiLoadingTitle')}
+        subtitle={t('aiLoadingSubtitle')}
+        estimatedSeconds={18}
+      />
       <div className="mb-8">
         <h1 className="text-3xl font-bold flex items-center gap-3 mb-2 text-foreground">
           <BookOpen className="text-indigo-500" size={32} /> 
@@ -67,86 +88,85 @@ export default function LessonPlanner() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="topic-input" className="text-foreground/80 font-semibold">{t('plannerTopicLabel')}</Label>
-                <Input
-                  id="topic-input"
-                  placeholder={t('plannerTopicPlaceholder')}
+                <Label htmlFor="topic">{t('plannerTopicLabel')}</Label>
+                <Input 
+                  id="topic" 
+                  placeholder={t('plannerTopicPlaceholder')} 
                   value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
+                  onChange={(e) => setPlannerParams({ topic: e.target.value })}
+                  className="bg-white dark:bg-slate-900 border-indigo-200 focus-visible:ring-indigo-500 h-11"
                   required
-                  className="bg-white dark:bg-background border-indigo-200 focus-visible:ring-indigo-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-foreground/80 font-semibold">{t('plannerCefrLabel')}</Label>
-                  <Select value={cefrLevel} onValueChange={setCefrLevel}>
-                    <SelectTrigger className="bg-white dark:bg-background border-indigo-200">
+                  <Label htmlFor="cefr">{t('plannerCefrLabel')}</Label>
+                  <Select value={cefrLevel} onValueChange={(val) => setPlannerParams({ cefrLevel: val })}>
+                    <SelectTrigger id="cefr" className="bg-white dark:bg-slate-900 border-indigo-200 focus:ring-indigo-500 h-11">
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
                     <SelectContent>
-                      {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(lvl => (
-                        <SelectItem key={lvl} value={lvl}>{lvl} Level</SelectItem>
-                      ))}
+                      <SelectItem value="A1">A1 Beginner</SelectItem>
+                      <SelectItem value="A2">A2 Elementary</SelectItem>
+                      <SelectItem value="B1">B1 Intermediate</SelectItem>
+                      <SelectItem value="B2">B2 Upper Intermediate</SelectItem>
+                      <SelectItem value="C1">C1 Advanced</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
-                  <Label className="text-foreground/80 font-semibold">{t('plannerDurationLabel')}</Label>
-                  <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger className="bg-white dark:bg-background border-indigo-200">
+                  <Label htmlFor="duration">{t('plannerDurationLabel')}</Label>
+                  <Select value={duration} onValueChange={(val) => setPlannerParams({ duration: val })}>
+                    <SelectTrigger id="duration" className="bg-white dark:bg-slate-900 border-indigo-200 focus:ring-indigo-500 h-11">
                       <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="30">30 Mins</SelectItem>
-                      <SelectItem value="45">45 Mins</SelectItem>
-                      <SelectItem value="60">60 Mins</SelectItem>
-                      <SelectItem value="90">90 Mins</SelectItem>
+                      <SelectItem value="30">30 mins</SelectItem>
+                      <SelectItem value="45">45 mins</SelectItem>
+                      <SelectItem value="60">60 mins</SelectItem>
+                      <SelectItem value="90">90 mins</SelectItem>
+                      <SelectItem value="120">120 mins</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-foreground/80 font-semibold">{t('plannerGroupLabel')}</Label>
-                <Select value={ageGroup} onValueChange={setAgeGroup}>
-                  <SelectTrigger className="bg-white dark:bg-background border-indigo-200">
-                    <SelectValue placeholder="Select age group" />
+                <Label htmlFor="ageGroup">{t('plannerGroupLabel')}</Label>
+                <Select value={ageGroup} onValueChange={(val) => setPlannerParams({ ageGroup: val })}>
+                  <SelectTrigger id="ageGroup" className="bg-white dark:bg-slate-900 border-indigo-200 focus:ring-indigo-500 h-11">
+                    <SelectValue placeholder="Select target" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Young Learners (6-10)">Kids (6-10)</SelectItem>
-                    <SelectItem value="Teens (11-17)">Teens (11-17)</SelectItem>
+                    <SelectItem value="Kids (6-11)">Kids (6-11)</SelectItem>
+                    <SelectItem value="Teens (12-17)">Teens (12-17)</SelectItem>
                     <SelectItem value="Adults">Adults</SelectItem>
-                    <SelectItem value="Business Professionals">Business Professionals</SelectItem>
+                    <SelectItem value="Business Professionals">Business</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-foreground/80 font-semibold">{t('plannerMethodLabel')}</Label>
-                <Select value={method} onValueChange={setMethod}>
-                  <SelectTrigger className="bg-white dark:bg-background border-indigo-200">
+                <Label htmlFor="method">{t('plannerMethodLabel')}</Label>
+                <Select value={method} onValueChange={(val) => setPlannerParams({ method: val })}>
+                  <SelectTrigger id="method" className="bg-white dark:bg-slate-900 border-indigo-200 focus:ring-indigo-500 h-11">
                     <SelectValue placeholder="Select method" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="PPP Framework">PPP Framework</SelectItem>
-                    <SelectItem value="Task-based Learning">Task-Based Learning</SelectItem>
-                    <SelectItem value="Test-Teach-Test">Test-Teach-Test</SelectItem>
+                    <SelectItem value="PPP Framework">PPP (Presentation, Practice, Production)</SelectItem>
+                    <SelectItem value="Task-Based Learning">Task-Based Learning</SelectItem>
+                    <SelectItem value="Communicative Approach">Communicative Approach</SelectItem>
+                    <SelectItem value="CLIL">CLIL (Content & Language Integrated)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <Button 
-                type="submit" 
-                disabled={loading} 
-                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-              >
+              <Button type="submit" size="lg" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-6 shadow-lg shadow-indigo-500/20" disabled={loading}>
                 {loading ? (
-                  <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> {t('plannerBuilding')}</span>
+                  <span className="flex items-center gap-2">{t('plannerBuilding')}</span>
                 ) : (
-                  <span className="flex items-center gap-2"><Sparkles size={18} /> {t('plannerSubmitBtn')}</span>
+                  <span className="flex items-center gap-2"><Sparkles size={20} /> {t('plannerSubmitBtn')}</span>
                 )}
               </Button>
             </form>

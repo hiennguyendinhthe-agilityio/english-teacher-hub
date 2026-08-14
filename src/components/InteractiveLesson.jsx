@@ -12,10 +12,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ClassroomPresenter from './ClassroomPresenter';
 import VocabularyMatchingGame from './VocabularyMatchingGame';
 import ClassroomTimer from './ClassroomTimer';
+import FlashcardBuilder from './FlashcardBuilder';
 import { exportToAnkiCsv, exportLessonToWordDoc } from '../utils/exportUtils';
 import { soundFX } from '../services/soundEffects';
 import { getLocalizedLesson } from '../utils/lessonTranslator';
 import { cn } from '@/lib/utils';
+
+const cleanQuestionPrompt = (rawPrompt) => {
+  let prompt = (rawPrompt || "").trim();
+  prompt = prompt
+    .replace(/^(?:\d+\.\s*)?(?:Question\s*\d+.*?:\s*|Q\d+:\s*)/i, '')
+    .replace(/^(?:\[[A-Z0-9]+\]\s*:?\s*)/i, '')
+    .replace(/^(?:Fill in the blank[s]?\s*:?\s*)/i, '')
+    .replace(/^[-:.]\s*/, '')
+    .trim();
+  if (prompt.startsWith('"') && prompt.endsWith('"')) {
+    prompt = prompt.slice(1, -1);
+  }
+  return prompt;
+};
 
 export default function InteractiveLesson({ lessonData: rawLessonData, onBack }) {
   const { t, lang } = useLanguage();
@@ -339,7 +354,7 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
                 <CardContent className="p-6 sm:p-8">
                   <h3 className="text-lg font-medium mb-6 leading-relaxed">
                     <span className="text-indigo-600 font-bold mr-2">{t('ilQuestion')} {idx + 1}:</span> 
-                    {q.question}
+                    {cleanQuestionPrompt(q.question)}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(q.options || []).map((opt, optIdx) => {
