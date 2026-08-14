@@ -476,36 +476,64 @@ function getMockWorksheet({ topic, cefrLevel = 'B1', type = 'Reading Passage & C
   const isGrammar = type.toLowerCase().includes('grammar') || type === 'grammar';
 
   const cleanTopic = topic || 'General English';
+  const lvl = (cefrLevel || 'B1').toUpperCase();
 
-  // 1. Generate Passage if Reading type
+  // Tier classification
+  const isA = lvl.startsWith('A'); // A1, A2
+  const isC = lvl.startsWith('C'); // C1, C2
+  const isB = !isA && !isC;        // B1, B2
+
+  // 1. Generate Tiered Reading Passage
   let readingPassage = null;
   if (isReading) {
-    readingPassage = `Learning about "${cleanTopic}" plays a crucial role in modern English communication. In today's interconnected world, mastering the vocabulary and core concepts of this subject allows students to express complex ideas with confidence and precision. Furthermore, engaging actively with real-world materials helps learners retain language structures naturally and communicate effectively with global peers.`;
+    if (isA) {
+      readingPassage = `Welcome to our class! Today, we are learning about "${cleanTopic}". Many students love this topic because it is very fun and interesting. In the morning, we talk about our favorite activities and practice new words with our teacher. Everyone is happy to share their ideas with friends in the classroom.`;
+    } else if (isC) {
+      readingPassage = `The scholarly discourse surrounding "${cleanTopic}" has undergone profound ideological evolution in recent years. Within contemporary academia, elucidating the nuanced complexities of this subject facilitates a deeper cognitive understanding among scholars. Furthermore, the synthesis of theoretical paradigms with empirical methodology remains indispensable for fostering rigorous analytical inquiry on a global scale.`;
+    } else {
+      // B1 / B2 (Default)
+      readingPassage = `Learning about "${cleanTopic}" plays a crucial role in modern English communication. In today's interconnected world, mastering the vocabulary and core concepts of this subject allows students to express complex ideas with confidence and precision. Furthermore, engaging actively with real-world materials helps learners retain language structures naturally and communicate effectively with global peers.`;
+    }
   }
 
-  // 2. Generate Exact Number of Questions (questionCount) matching Type & Topic & CEFR
+  // 2. Generate Exact Number of Questions (questionCount) strictly tailored to CEFR Tier
   const generatedQuestions = [];
 
   for (let i = 1; i <= questionCount; i++) {
     if (isVocab) {
-      // Vocabulary Cloze questions
-      const vocabBank = [
-        { word: 'essential', blank: `Understanding the core concepts of ${cleanTopic} is _____ for every student.`, opts: ['essential', 'hesitant', 'reluctant', 'careless'], ans: 'essential', exp: "'Essential' means absolutely necessary or extremely important." },
-        { word: 'participate', blank: `All students are encouraged to _____ actively in discussions about ${cleanTopic}.`, opts: ['participate', 'hesitate', 'complain', 'postpone'], ans: 'participate', exp: "'Participate in' is the correct verb collocation for taking part in an activity." },
-        { word: 'creative', blank: `Developing _____ solutions helps resolve issues related to ${cleanTopic}.`, opts: ['creative', 'tedious', 'clumsy', 'hostile'], ans: 'creative', exp: "'Creative' (adj) describes producing new and original ideas." },
-        { word: 'equipment', blank: `Modern _____ is required to conduct proper research on ${cleanTopic}.`, opts: ['equipment', 'argument', 'accident', 'disaster'], ans: 'equipment', exp: "'Equipment' refers to the set of necessary tools or items." },
-        { word: 'opportunity', blank: `This program provides a valuable _____ to learn more about ${cleanTopic}.`, opts: ['opportunity', 'obstacle', 'tragedy', 'crisis'], ans: 'opportunity', exp: "'Opportunity' means a set of circumstances that makes it possible to do something." },
-        { word: 'environment', blank: `We should protect our natural _____ while studying ${cleanTopic}.`, opts: ['environment', 'punishment', 'discomfort', 'loneliness'], ans: 'environment', exp: "'Environment' refers to the natural surroundings." },
-        { word: 'international', blank: `This project involves _____ cooperation between different schools.`, opts: ['international', 'hopeless', 'narrow', 'reckless'], ans: 'international', exp: "'International' means involving two or more countries." },
-        { word: 'improve', blank: `Consistent daily practice will greatly _____ your knowledge of ${cleanTopic}.`, opts: ['improve', 'destroy', 'ignore', 'forget'], ans: 'improve', exp: "'Improve' means to make or become better." },
-        { word: 'confidence', blank: `Speaking in public helps students build _____ and self-esteem.`, opts: ['confidence', 'confusion', 'weakness', 'doubt'], ans: 'confidence', exp: "'Confidence' means the feeling or belief that one can rely on someone or something." },
-        { word: 'cooperate', blank: `Team members must _____ closely to complete the assignment on ${cleanTopic}.`, opts: ['cooperate', 'compete', 'disagree', 'quarrel'], ans: 'cooperate', exp: "'Cooperate' means to work together toward the same end." }
-      ];
+      // Stratified Vocabulary Bank
+      let vocabBank = [];
+      if (isA) {
+        vocabBank = [
+          { word: 'classroom', blank: `Students are sitting together inside the _____ to study ${cleanTopic}.`, opts: ['classroom', 'kitchen', 'bedroom', 'airport'], ans: 'classroom', exp: "A1 Level: 'Classroom' is the room where students have lessons." },
+          { word: 'friendly', blank: `My new classmate is very _____ and always helps me with ${cleanTopic}.`, opts: ['friendly', 'angry', 'terrible', 'dangerous'], ans: 'friendly', exp: "A1 Level: 'Friendly' (adj) means kind and pleasant to others." },
+          { word: 'homework', blank: `Remember to finish your English _____ about ${cleanTopic} tonight.`, opts: ['homework', 'breakfast', 'bicycle', 'sunlight'], ans: 'homework', exp: "A1 Level: 'Homework' is schoolwork assigned to be done at home." },
+          { word: 'favorite', blank: `English is my _____ subject at school.`, opts: ['favorite', 'broken', 'empty', 'heavy'], ans: 'favorite', exp: "A2 Level: 'Favorite' means best liked or preferred." },
+          { word: 'activity', blank: `Playing sports is a healthy daily _____ for children.`, opts: ['activity', 'building', 'mountain', 'blanket'], ans: 'activity', exp: "A2 Level: 'Activity' means a thing that a person or group does." }
+        ];
+      } else if (isC) {
+        vocabBank = [
+          { word: 'indispensable', blank: `A comprehensive grasp of ${cleanTopic} is _____ for contemporary scholars.`, opts: ['indispensable', 'superficial', 'negligible', 'redundant'], ans: 'indispensable', exp: "C1 Level: 'Indispensable' means absolutely essential or unavoidable." },
+          { word: 'unprecedented', blank: `Recent technological advancements have catalyzed _____ shifts in ${cleanTopic}.`, opts: ['unprecedented', 'mediocre', 'conventional', 'trivial'], ans: 'unprecedented', exp: "C1 Level: 'Unprecedented' means never done or known before." },
+          { word: 'ubiquitous', blank: `Digital media has become _____ across modern educational environments.`, opts: ['ubiquitous', 'scarce', 'obsolete', 'ephemeral'], ans: 'ubiquitous', exp: "C2 Level: 'Ubiquitous' means present, appearing, or found everywhere." },
+          { word: 'meticulous', blank: `Conducting research on ${cleanTopic} demands _____ attention to detail.`, opts: ['meticulous', 'reckless', 'hasty', 'indifferent'], ans: 'meticulous', exp: "C1 Level: 'Meticulous' means showing great attention to detail; very careful and precise." },
+          { word: 'facilitate', blank: `Innovative pedagogical methods serve to _____ deeper understanding.`, opts: ['facilitate', 'hinder', 'obstruct', 'stagnate'], ans: 'facilitate', exp: "C1 Level: 'Facilitate' means to make an action or process easier." }
+        ];
+      } else {
+        // B1 / B2
+        vocabBank = [
+          { word: 'essential', blank: `Understanding the core concepts of ${cleanTopic} is _____ for every student.`, opts: ['essential', 'hesitant', 'reluctant', 'careless'], ans: 'essential', exp: "B1 Level: 'Essential' means absolutely necessary or extremely important." },
+          { word: 'participate', blank: `All students are encouraged to _____ actively in discussions about ${cleanTopic}.`, opts: ['participate', 'hesitate', 'complain', 'postpone'], ans: 'participate', exp: "B1 Level: 'Participate in' is the standard verb collocation for taking part." },
+          { word: 'sustainable', blank: `Developing _____ solutions helps resolve issues related to ${cleanTopic}.`, opts: ['sustainable', 'tedious', 'clumsy', 'hostile'], ans: 'sustainable', exp: "B2 Level: 'Sustainable' means able to be maintained at a certain rate or level." },
+          { word: 'opportunity', blank: `This program provides a valuable _____ to explore ${cleanTopic}.`, opts: ['opportunity', 'obstacle', 'tragedy', 'crisis'], ans: 'opportunity', exp: "B1 Level: 'Opportunity' means a favorable circumstance for achieving a goal." },
+          { word: 'international', blank: `This project involves _____ cooperation between different academic groups.`, opts: ['international', 'hopeless', 'narrow', 'reckless'], ans: 'international', exp: "B2 Level: 'International' means involving two or more nations." }
+        ];
+      }
 
       const item = vocabBank[(i - 1) % vocabBank.length];
       generatedQuestions.push({
         id: i,
-        question: `Question ${i}: Fill in the blank with the best vocabulary word: "${item.blank}"`,
+        question: `Question ${i} [${lvl}]: Fill in the blank: "${item.blank}"`,
         questionText: item.blank,
         options: item.opts.map((opt, idx) => `${String.fromCharCode(65 + idx)}. ${opt}`),
         answer: `A. ${item.ans}`,
@@ -513,24 +541,39 @@ function getMockWorksheet({ topic, cefrLevel = 'B1', type = 'Reading Passage & C
         explanation: item.exp
       });
     } else if (isGrammar) {
-      // Grammar Multiple Choice matching CEFR Level
-      const grammarBank = [
-        { q: `Which sentence about "${cleanTopic}" is grammatically correct?`, opts: [`She has studied ${cleanTopic} since 2022.`, `She study ${cleanTopic} since 2022.`, `She is study ${cleanTopic} since 2022.`, `She studied ${cleanTopic} since 2022.`], ans: `A. She has studied ${cleanTopic} since 2022.`, exp: "Present Perfect ('has studied + since + time') is used for an action that started in the past and continues to the present." },
-        { q: `If we _____ more attention to ${cleanTopic}, we will achieve better results.`, opts: [`pay`, `paid`, `will pay`, `would pay`], ans: `A. pay`, exp: "First Conditional structure: If + Present Simple (pay), will + Verb." },
-        { q: `The research paper on ${cleanTopic} was _____ by the professor yesterday.`, opts: [`published`, `publish`, `publishing`, `publishes`], ans: `A. published`, exp: "Passive voice in past simple requires 'was/were + past participle (V3/ed)'." },
-        { q: `Neither the teacher nor the students _____ satisfied with the initial results.`, opts: [`were`, `was`, `is`, `be`], ans: `A. were`, exp: "Subject-verb agreement: with 'neither... nor...', the verb agrees with the closer subject ('the students' -> 'were')." },
-        { q: `By the time the conference on ${cleanTopic} started, they _____ their presentation.`, opts: [`had completed`, `have completed`, `completed`, `were completing`], ans: `A. had completed`, exp: "Past Perfect ('had completed') describes an action completed before another past event ('started')." },
-        { q: `Students are look forward to _____ more practical workshops on ${cleanTopic}.`, opts: [`attending`, `attend`, `attended`, `attendance`], ans: `A. attending`, exp: "'Look forward to + V-ing' is the standard gerund pattern." },
-        { q: `Rarely _____ such dedication when researching ${cleanTopic}.`, opts: [`have we seen`, `we have seen`, `we saw`, `saw we`], ans: `A. have we seen`, exp: "Negative adverb inversion: 'Rarely + auxiliary verb (have) + subject (we) + main verb'." },
-        { q: `The more you practice ${cleanTopic}, _____ you will become.`, opts: [`the more proficient`, `more proficient`, `the most proficient`, `proficienter`], ans: `A. the more proficient`, exp: "Double comparative structure: 'The more..., the more...'." },
-        { q: `It is essential that every student _____ the safety rules before starting.`, opts: [`follow`, `follows`, `followed`, `following`], ans: `A. follow`, exp: "Subjunctive mood after 'It is essential that...': use bare infinitive (follow)." },
-        { q: `He denied _____ the confidential notes about ${cleanTopic}.`, opts: [`leaking`, `to leak`, `leak`, `leaked`], ans: `A. leaking`, exp: "The verb 'deny' is followed by a gerund (V-ing)." }
-      ];
+      // Stratified Grammar Bank
+      let grammarBank = [];
+      if (isA) {
+        grammarBank = [
+          { q: `She _____ a student who studies ${cleanTopic} every day.`, opts: ['is', 'are', 'am', 'be'], ans: 'A. is', exp: "A1 Level: Third-person singular pronoun 'She' takes the verb 'is' in Present Simple." },
+          { q: `They _____ to the English club yesterday afternoon.`, opts: ['went', 'go', 'goes', 'going'], ans: 'A. went', exp: "A2 Level: Past Simple tense of the irregular verb 'go' is 'went'." },
+          { q: `There _____ many books about ${cleanTopic} on the table.`, opts: ['are', 'is', 'am', 'be'], ans: 'A. are', exp: "A1 Level: Plural subject 'many books' requires 'there are'." },
+          { q: `He _____ not like doing difficult tests.`, opts: ['does', 'do', 'is', 'are'], ans: 'A. does', exp: "A1 Level: Negative present simple auxiliary for 'He' is 'does not'." },
+          { q: `We usually play badminton _____ Sunday mornings.`, opts: ['on', 'in', 'at', 'to'], ans: 'A. on', exp: "A2 Level: Preposition 'on' is used with days of the week ('on Sunday mornings')." }
+        ];
+      } else if (isC) {
+        grammarBank = [
+          { q: `Rarely _____ such profound insights regarding ${cleanTopic}.`, opts: ['have scholars encountered', 'scholars have encountered', 'encountered scholars', 'did scholars encountered'], ans: 'A. have scholars encountered', exp: "C1 Level: Negative adverb inversion ('Rarely + auxiliary verb + subject + past participle')." },
+          { q: `It is imperative that the researcher _____ all relevant citations.`, opts: ['include', 'includes', 'included', 'including'], ans: 'A. include', exp: "C1 Level: Present subjunctive mood after 'It is imperative that...' requires bare infinitive ('include')." },
+          { q: `Had they evaluated the data thoroughly, they _____ such errors.`, opts: ['would have avoided', 'will avoid', 'avoided', 'would avoid'], ans: 'A. would have avoided', exp: "C1 Level: Inverted Third Conditional ('Had + Subject + V3, Subject + would have + V3')." },
+          { q: `Not only _____ the primary hypothesis, but she also introduced a new framework.`, opts: ['did she substantiate', 'she substantiated', 'she did substantiate', 'substantiated she'], ans: 'A. did she substantiate', exp: "C2 Level: Negative correlative inversion with 'Not only did she + bare infinitive'." },
+          { q: `The committee demanded that the policy on ${cleanTopic} _____ immediately.`, opts: ['be revised', 'is revised', 'was revised', 'has been revised'], ans: 'A. be revised', exp: "C2 Level: Passive subjunctive ('be + past participle') after demand verbs." }
+        ];
+      } else {
+        // B1 / B2
+        grammarBank = [
+          { q: `She _____ ${cleanTopic} since she graduated from university.`, opts: [`has studied`, `studies`, `studied`, `is studying`], ans: `A. has studied`, exp: "B1 Level: Present Perfect ('has studied + since + point in time') describes action from past continuing to present." },
+          { q: `If we _____ more practical methods, students will learn faster.`, opts: [`apply`, `applied`, `will apply`, `would apply`], ans: `A. apply`, exp: "B1 Level: First Conditional ('If + Present Simple, will + Verb')." },
+          { q: `The research on ${cleanTopic} was _____ by the team last week.`, opts: [`completed`, `complete`, `completing`, `completes`], ans: `A. completed`, exp: "B1 Level: Past Simple Passive ('was/were + V3/ed')." },
+          { q: `He is looking forward to _____ the workshop next month.`, opts: [`attending`, `attend`, `attended`, `attendance`], ans: `A. attending`, exp: "B2 Level: 'Look forward to + V-ing' gerund construction." },
+          { q: `If I _____ in your position, I would accept the challenge.`, opts: [`were`, `was`, `am`, `be`], ans: `A. were`, exp: "B2 Level: Second Conditional hypothetical subjunctive ('If I were...')." }
+        ];
+      }
 
       const item = grammarBank[(i - 1) % grammarBank.length];
       generatedQuestions.push({
         id: i,
-        question: `Question ${i}: ${item.q}`,
+        question: `Question ${i} [${lvl}]: ${item.q}`,
         questionText: item.q,
         options: item.opts,
         answer: item.ans,
@@ -538,24 +581,33 @@ function getMockWorksheet({ topic, cefrLevel = 'B1', type = 'Reading Passage & C
         explanation: item.exp
       });
     } else {
-      // Reading Comprehension Questions
-      const readingQuestions = [
-        { q: `What is the primary objective of studying "${cleanTopic}" according to the passage?`, opts: [`A. To build confidence and express complex ideas effectively.`, `B. To memorize grammar rules without speaking.`, `C. To replace native languages entirely.`, `D. To avoid international communication.`], ans: `A. To build confidence and express complex ideas effectively.`, exp: "Stated directly in the passage: studying this subject allows learners to express complex ideas with confidence." },
-        { q: `The author mentions that active engagement with real-world materials helps learners:`, opts: [`A. Retain language structures naturally and communicate with global peers.`, `B. Finish tests quickly without studying.`, `C. Memorize vocabulary lists only.`, `D. Avoid discussing complex topics.`], ans: `A. Retain language structures naturally and communicate with global peers.`, exp: "The passage explicitly highlights that active engagement fosters natural language retention." },
-        { q: `Which of the following words in the passage is closest in meaning to "crucial"?`, opts: [`A. Extremely important / vital`, `B. Unnecessary`, `C. Complicated`, `D. Optional`], ans: `A. Extremely important / vital`, exp: "'Crucial' means of great importance, especially in the success of something." },
-        { q: `What can be inferred about the future importance of "${cleanTopic}"?`, opts: [`A. It will remain valuable as global connectivity continues to grow.`, `B. It will become obsolete in a few years.`, `C. Only language experts need to study it.`, `D. It is only useful for written exams.`], ans: `A. It will remain valuable as global connectivity continues to grow.`, exp: "The text emphasizes international connectivity and ongoing real-world communication." },
-        { q: `What is the overall tone of the author regarding "${cleanTopic}"?`, opts: [`A. Encouraging and constructive`, `B. Skeptical and critical`, `C. Sarcastic`, `D. Indifferent`], ans: `A. Encouraging and constructive`, exp: "The author advocates for active engagement and positive communication outcomes." },
-        { q: `According to the passage, communicating with global peers requires:`, opts: [`A. Core concepts and confidence in expression.`, `B. Perfect native accent from day one.`, `C. Traveling to every country.`, `D. Memorizing every word in the dictionary.`], ans: `A. Core concepts and confidence in expression.`, exp: "Emphasized in the introduction paragraph." },
-        { q: `Which title would be the most fitting alternative for this reading passage?`, opts: [`A. The Power of Mastering ${cleanTopic} in Modern Communication`, `B. The History of Ancient Languages`, `C. Difficult Grammar Challenges`, `D. Why Exams Are Hard`], ans: `A. The Power of Mastering ${cleanTopic} in Modern Communication`, exp: "A comprehensive title summarizing the main focus of the text." },
-        { q: `The phrase "interconnected world" in the text suggests that:`, opts: [`A. People from different countries interact more frequently than ever.`, `B. Computers have replaced human communication.`, `C. Travel is no longer necessary.`, `D. Communication is becoming more isolated.`], ans: `A. People from different countries interact more frequently than ever.`, exp: "Interconnected describes globally linked societies." },
-        { q: `How does the author support the main argument?`, opts: [`A. By explaining practical benefits of vocabulary and real-world practice.`, `B. By presenting statistical survey charts.`, `C. By criticizing traditional teaching methods.`, `D. By quoting historical poems.`], ans: `A. By explaining practical benefits of vocabulary and real-world practice.`, exp: "The text details how vocabulary mastery and active engagement create effective communication." },
-        { q: `In summary, mastering "${cleanTopic}" enables students to:`, opts: [`A. Unlock international opportunities and express ideas with clarity.`, `B. Pass one exam and stop learning.`, `C. Speak only in formal lectures.`, `D. Avoid writing tasks.`], ans: `A. Unlock international opportunities and express ideas with clarity.`, exp: "Matches the concluding takeaway of the text." }
-      ];
+      // Stratified Reading Comprehension
+      let readingQuestions = [];
+      if (isA) {
+        readingQuestions = [
+          { q: `What is the main topic of the reading text?`, opts: [`A. Learning about ${cleanTopic} in class.`, `B. Playing football in the rain.`, `C. Cooking dinner at home.`, `D. Sleeping late on Sunday.`], ans: `A. Learning about ${cleanTopic} in class.`, exp: "A1 Level: Directly stated in the first sentence of the passage." },
+          { q: `How do the students feel in the classroom?`, opts: [`A. They are happy to share their ideas with friends.`, `B. They are very tired and sad.`, `C. They want to go home immediately.`, `D. They do not like the teacher.`], ans: `A. They are happy to share their ideas with friends.`, exp: "A1 Level: Highlighted in the last sentence: 'Everyone is happy to share their ideas'." },
+          { q: `When do students practice new words?`, opts: [`A. In the morning with their teacher.`, `B. Late at night.`, `C. Only on holidays.`, `D. Never.`], ans: `A. In the morning with their teacher.`, exp: "A2 Level: Stated clearly in sentence 3." }
+        ];
+      } else if (isC) {
+        readingQuestions = [
+          { q: `What core philosophical premise does the text present regarding "${cleanTopic}"?`, opts: [`A. It has undergone profound ideological evolution requiring nuanced analytical inquiry.`, `B. It is purely simplistic and requires no theoretical basis.`, `C. It is completely outdated and holds no academic value.`, `D. It should be separated from empirical methodology.`], ans: `A. It has undergone profound ideological evolution requiring nuanced analytical inquiry.`, exp: "C1 Level: Stated in the opening paragraph regarding scholarly discourse evolution." },
+          { q: `The author asserts that synthesizing theoretical paradigms with empirical methodology is:`, opts: [`A. Indispensable for rigorous analytical inquiry.`, `B. Entirely redundant and negligible.`, `C. Harmful to scholarly communication.`, `D. Secondary to informal observation.`], ans: `A. Indispensable for rigorous analytical inquiry.`, exp: "C2 Level: Reflected directly in the concluding sentence of the text." },
+          { q: `In context, the word "elucidating" is most synonymous with:`, opts: [`A. Clarifying and explaining in detail`, `B. Obscuring and concealing`, `C. Complicating unnecessarily`, `D. Rejecting outright`], ans: `A. Clarifying and explaining in detail`, exp: "C1 Level: 'Elucidate' means to make clear or explain." }
+        ];
+      } else {
+        // B1 / B2
+        readingQuestions = [
+          { q: `What is the primary objective of studying "${cleanTopic}" according to the passage?`, opts: [`A. To build confidence and express complex ideas effectively.`, `B. To memorize grammar rules without speaking.`, `C. To replace native languages entirely.`, `D. To avoid international communication.`], ans: `A. To build confidence and express complex ideas effectively.`, exp: "B1 Level: Stated directly in the passage." },
+          { q: `The author mentions that active engagement with real-world materials helps learners:`, opts: [`A. Retain language structures naturally and communicate with global peers.`, `B. Finish tests quickly without studying.`, `C. Memorize vocabulary lists only.`, `D. Avoid discussing complex topics.`], ans: `A. Retain language structures naturally and communicate with global peers.`, exp: "B2 Level: Explicitly stated in sentence 3." },
+          { q: `Which of the following words in the passage is closest in meaning to "crucial"?`, opts: [`A. Extremely important / vital`, `B. Unnecessary`, `C. Complicated`, `D. Optional`], ans: `A. Extremely important / vital`, exp: "B2 Level: 'Crucial' means of paramount importance." }
+        ];
+      }
 
       const item = readingQuestions[(i - 1) % readingQuestions.length];
       generatedQuestions.push({
         id: i,
-        question: `Question ${i}: ${item.q}`,
+        question: `Question ${i} [${lvl}]: ${item.q}`,
         questionText: item.q,
         options: item.opts,
         answer: item.ans,
@@ -566,14 +618,14 @@ function getMockWorksheet({ topic, cefrLevel = 'B1', type = 'Reading Passage & C
   }
 
   return {
-    title: `Worksheet: ${cleanTopic} (${cefrLevel})`,
-    cefrLevel,
+    title: `Worksheet: ${cleanTopic} (${lvl})`,
+    cefrLevel: lvl,
     type,
     instructions: isReading 
-      ? "Read the passage carefully and answer all comprehension questions below."
+      ? `Read the passage carefully (${lvl} Level) and answer all comprehension questions below.`
       : isVocab 
-      ? "Fill in the blanks with the correct vocabulary word from the given options."
-      : "Choose the grammatically correct option for each question.",
+      ? `Fill in the blanks with the correct ${lvl}-level vocabulary word from the options.`
+      : `Choose the grammatically correct ${lvl}-level option for each question.`,
     readingPassage,
     questions: generatedQuestions
   };
