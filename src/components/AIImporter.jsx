@@ -15,6 +15,7 @@ import { generateLessonFromText } from '../services/aiService';
 import InteractiveLesson from './InteractiveLesson';
 import ClassroomPresenter from './ClassroomPresenter';
 import { exportToAnkiCsv, exportLessonToWordDoc } from '../utils/exportUtils';
+import { parseUploadedFile } from '../utils/fileParser';
 import { soundFX } from '../services/soundEffects';
 import { cn } from '@/lib/utils';
 
@@ -159,6 +160,7 @@ export default function AIImporter({ setActiveTab }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showPresenter, setShowPresenter] = useState(false);
   const [error, setError] = useState('');
+  const [isReadingFile, setIsReadingFile] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleProcess = async () => {
@@ -186,26 +188,22 @@ export default function AIImporter({ setActiveTab }) {
     soundFX.playFlip();
   };
 
-  const readFileContent = (file) => {
+  const readFileContent = async (file) => {
     if (!file) return;
     setUploadedFile(file);
     setError('');
+    setIsReadingFile(true);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target.result;
-      if (typeof content === 'string') {
-        setText(content);
-        soundFX.playFlip();
-      }
-    };
-    reader.onerror = () => {
-      setError('Failed to read file');
+    try {
+      const cleanContent = await parseUploadedFile(file);
+      setText(cleanContent);
+      soundFX.playFlip();
+    } catch (err) {
+      setError(err.message || 'Failed to read document file');
       soundFX.playError();
-    };
-
-    // Read as plain text (supports .txt, .md, .csv, .json, and plain docx text)
-    reader.readAsText(file);
+    } finally {
+      setIsReadingFile(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -374,10 +372,14 @@ export default function AIImporter({ setActiveTab }) {
                     className="hidden"
                   />
                   <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mb-3 shadow-inner">
-                    <UploadCloud size={30} />
+                    {isReadingFile ? (
+                      <Loader2 size={30} className="animate-spin" />
+                    ) : (
+                      <UploadCloud size={30} />
+                    )}
                   </div>
                   <h3 className="text-sm sm:text-base font-bold text-foreground mb-1">
-                    {t('impDropzoneText')}
+                    {isReadingFile ? t('impExtractingFile') : t('impDropzoneText')}
                   </h3>
                   <p className="text-xs text-muted-foreground max-w-md mb-4">
                     {t('impDropzoneSub')}
@@ -394,27 +396,35 @@ export default function AIImporter({ setActiveTab }) {
 
                 {/* Uploaded File Chip & Text Preview */}
                 {uploadedFile && (
-                  <div className="mt-4 p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <FileText size={18} className="text-emerald-600 shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-xs sm:text-sm font-bold text-foreground truncate block">
-                          {uploadedFile.name}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {(uploadedFile.size / 1024).toFixed(1)} KB · {t('impFileLoaded')}
-                        </span>
+                  <div className="mt-4 space-y-3">
+                    <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <FileText size={18} className="text-emerald-600 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="text-xs sm:text-sm font-bold text-foreground truncate block">
+                            {uploadedFile.name}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {(uploadedFile.size / 1024).toFixed(1)} KB · {t('impFileLoaded')}
+                          </span>
+                        </div>
                       </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => { e.stopPropagation(); removeFile(); }}
+                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive shrink-0"
+                        title={t('impRemoveFile')}
+                      >
+                        <X size={16} />
+                      </Button>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={(e) => { e.stopPropagation(); removeFile(); }}
-                      className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive shrink-0"
-                      title={t('impRemoveFile')}
-                    >
-                      <X size={16} />
-                    </Button>
+
+                    {text && (
+                      <div className="p-3 bg-secondary/20 rounded-xl border border-border/50 max-h-36 overflow-y-auto font-mono text-xs text-muted-foreground leading-relaxed">
+                        {text.slice(0, 350)}...
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

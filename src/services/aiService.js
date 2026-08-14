@@ -963,41 +963,54 @@ function getMockFlashcards(topic) {
 }
 
 function getMockLessonFromText(rawText) {
-  const text = (rawText || '').trim();
+  // Sanitize input text to strip non-printable characters & binary replacement symbols
+  const text = (rawText || '')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFFFD]/g, ' ')
+    .trim();
   const lower = text.toLowerCase();
 
   // 1. Extract or Synthesize Title
   let title = "Custom AI Lesson: Interactive English";
   const titleMatch = text.match(/(?:Unit\s*\d+|Lesson\s*\d+|Topic|Chủ đề)[:\s]+([^\n\r]+)/i);
   if (titleMatch) {
-    title = titleMatch[0].trim();
+    const rawTitle = titleMatch[0].trim();
+    if (/^[A-Za-z0-9\s:–—&()áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]+$/i.test(rawTitle)) {
+      title = rawTitle;
+    }
   } else {
     const firstLine = text.split('\n').filter(l => l.trim().length > 0)[0];
-    if (firstLine && firstLine.length < 60) {
+    if (firstLine && firstLine.length < 60 && /^[A-Za-z0-9\s:–—&()áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]+$/i.test(firstLine)) {
       title = firstLine.replace(/^[#*-\s]+/, '').trim();
     }
   }
 
-  // 2. Intelligent Vocabulary Extraction via Regex
+  // 2. Intelligent Vocabulary Extraction via Strict Regex
   const extractedVocab = [];
   const lines = text.split('\n');
 
   // Regex 1: word (n/v/adj): meaning OR word - meaning
-  const vocabRegex1 = /([A-Za-z\s-]+)\s*(?:\(([a-z.\s/]+)\))?\s*[:\-\—]\s*([^\n\r]+)/i;
+  const vocabRegex1 = /^([A-Za-z\s-]{2,30})\s*(?:\(([a-z.\s/]{1,10})\))?\s*[:\-\—]\s*([^\n\r]+)$/i;
   
   lines.forEach(line => {
     const trimmed = line.trim().replace(/^[0-9]+[.)]\s*/, '').replace(/^[*\-•]\s*/, '');
     const match = trimmed.match(vocabRegex1);
-    if (match && match[1].trim().length > 1 && match[1].trim().split(' ').length <= 4) {
-      const word = match[1].trim();
-      const type = match[2] ? `(${match[2].trim()})` : '(n)';
-      const meaning = match[3].trim();
-      extractedVocab.push({
-        word,
-        type,
-        transcription: `/${word.toLowerCase().replace(/[^a-z]/g, '')}/`,
-        meaning
-      });
+    if (match) {
+      const rawWord = match[1].trim();
+      const rawMeaning = match[3].trim();
+
+      // Ensure word is clean English letters & meaning is not corrupted symbols
+      const isCleanWord = /^[A-Za-z][A-Za-z\s-]{1,28}$/.test(rawWord) && rawWord.split(' ').length <= 4;
+      const isCleanMeaning = rawMeaning.length >= 2 && rawMeaning.length <= 150 && !/[^\x20-\x7E\sÀ-ỹĐđ]/.test(rawMeaning);
+
+      if (isCleanWord && isCleanMeaning) {
+        const type = match[2] ? `(${match[2].trim()})` : '(n)';
+        extractedVocab.push({
+          word: rawWord,
+          type,
+          transcription: `/${rawWord.toLowerCase().replace(/[^a-z]/g, '')}/`,
+          meaning: rawMeaning
+        });
+      }
     }
   });
 
