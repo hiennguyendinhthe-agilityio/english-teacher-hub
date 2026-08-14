@@ -1,0 +1,50 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import AIImporter from './AIImporter';
+import { LanguageProvider } from '../context/LanguageContext';
+
+const renderComponent = () => {
+  return render(
+    <LanguageProvider>
+      <AIImporter setActiveTab={vi.fn()} />
+    </LanguageProvider>
+  );
+};
+
+describe('AIImporter Component', () => {
+  it('renders AI Importer with sample presets and textarea', () => {
+    renderComponent();
+    expect(screen.getByText(/Trợ Lý Nhập Giáo Án AI|AI Lesson Importer/i)).toBeInTheDocument();
+    expect(screen.getByText(/Mẫu Giáo Án Nhanh|Quick Sample Presets/i)).toBeInTheDocument();
+    expect(screen.getByText(/Unit 6: Dịch Vụ Cộng Đồng|Unit 6: Community Service/i)).toBeInTheDocument();
+  });
+
+  it('applies sample preset to textarea when clicked', () => {
+    renderComponent();
+    const presetBtn = screen.getByText(/Unit 6: Dịch Vụ Cộng Đồng|Unit 6: Community Service/i);
+    fireEvent.click(presetBtn);
+
+    const textarea = screen.getByRole('textbox');
+    expect(textarea.value).toContain('Unit 6: COMMUNITY SERVICE');
+    expect(textarea.value).toContain('volunteer');
+  });
+
+  it('generates structured lesson and displays extracted dashboard', async () => {
+    renderComponent();
+    const presetBtn = screen.getByText(/Unit 6: Dịch Vụ Cộng Đồng|Unit 6: Community Service/i);
+    fireEvent.click(presetBtn);
+
+    const submitBtn = screen.getByRole('button', { name: /Tạo Bài Giảng Tương Tác|Generate Interactive Lesson/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Nhập Bài Thành Công|Import Successful/i)).toBeInTheDocument();
+    }, { timeout: 6000 });
+
+    expect(screen.getByText(/Unit 6: COMMUNITY SERVICE/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/volunteer/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Vào Học Bài Giảng|Start Interactive Lesson/i)).toBeInTheDocument();
+    expect(screen.getByText(/Trình Chiếu TV|Classroom TV Presenter/i)).toBeInTheDocument();
+  });
+});
