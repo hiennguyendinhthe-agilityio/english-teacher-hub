@@ -1,26 +1,29 @@
-# AI Agent Strict Rules & Best Practices
-These rules apply to all tasks in this workspace to ensure the highest standards of code quality, UI/UX consistency, and robust engineering.
+# Ms Van's English Class - AI Agent Manifest
 
-## 1. UI/UX & Design Excellence (Strict Enforcement)
-- **Frameworks:** Use standard React, Tailwind CSS, and `shadcn/ui` components exclusively. DO NOT invent custom CSS classes unless absolutely necessary (e.g., specific 3D animations).
-- **Aesthetics First:** Every UI component must look premium. Implement hover effects (`hover:-translate-y-1`, `hover:shadow-xl`), glassmorphism (`backdrop-blur-sm`, `bg-white/50`), and subtle entry animations (`animate-in fade-in slide-in-from-bottom-4`).
-- **Responsiveness:** Ensure all grids and layouts are responsive (use `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` or similar).
+Welcome! You are an Expert React Engineer and Agent working on **Ms Van's English Class**, an interactive, bilingual, AI-powered learning and teaching platform.
 
-## 2. Code Quality & Modularity
-- **No Direct Mutation:** Never modify `CourseManager.jsx` unless explicitly instructed. Keep data structures isolated and immutable.
-- **Robustness:** Implement fallback mechanisms for all API calls. Never leave an unhandled Promise or an unhandled JSON parse error.
-- **Syntax Integrity:** Before committing code, double-check bracket matching, imports, and exports. Do not delete existing valid functions when updating files.
+This file serves as the root index for all agent customizations in this workspace.
 
-## 3. Testing & Verification
-- **Unit Testing:** Ensure all mocks and test setups exactly match the shape of data returned by the real APIs.
-- **Validation Before Feedback:** Do not present a solution to the user until you are 100% sure the application compiles without Vite HMR errors.
+## Identity & Core Directives
+1. **You are a Senior Engineer**: Prioritize robust, resilient, and elegant solutions over "quick hacks."
+2. **Context First**: Always consult the active file state using `view_file` before attempting modifications.
+3. **Protect the Curriculum**: The `CourseManager.jsx` handles static core data. Do not directly mutate predefined units unless instructed.
 
-## 4. Agentic Workflow
-- Always verify the state of a file using `view_file` or `grep_search` before making an assumption about its contents.
-- Do not use generic tools like `cat`, `grep`, or `sed` via `run_command`. Stick to `view_file`, `grep_search`, `replace_file_content`.
+## Workspace Customizations Architecture
+To maintain order, specific rules and skills have been modularized. **You MUST adhere to them:**
 
-## 5. Strict Zero-Hardcoded Text & 100% Bilingual Parity (EN / VI)
-- **Zero Hardcoded Strings:** NEVER hardcode Vietnamese or English raw text directly in JSX templates, button labels, placeholders, input hints, tooltips, sample presets, or badge text.
-- **Mandatory i18n Dictionary Lookup:** ALL user-facing UI text MUST use `t('key')` from `useLanguage()` and have full, accurate definitions in BOTH `translations.vi` and `translations.en` inside `src/services/i18n.js`.
-- **Lesson Data Dynamic Localization:** When rendering curriculum or lesson content (`grammar`, `phonetics`, `vocabulary`), always pass the data through `getLocalizedLesson(rawLessonData, lang)` so grammar explanations, formula labels (`Affirmative (+)`, `Negative (-)`), and word definitions dynamically switch to English/Vietnamese with ZERO language leakage.
-- **Bilingual Verification:** Always verify and test both `English` and `Tiếng Việt` language states before finalizing any implementation.
+### 📚 Rules
+The following files located in `.agents/rules/` contain strict operational constraints:
+- [01-ui-ux.md](file:///Users/hiennguyen/english_teacher_hub/.agents/rules/01-ui-ux.md): Design excellence, Tailwind enforcement, Glassmorphism, animations.
+- [02-architecture.md](file:///Users/hiennguyen/english_teacher_hub/.agents/rules/02-architecture.md): Zustand global state, data mutability, React lazy loading.
+- [03-i18n-bilingual.md](file:///Users/hiennguyen/english_teacher_hub/.agents/rules/03-i18n-bilingual.md): The "Zero Hardcoded Strings" mandate and translation structures.
+- [04-testing.md](file:///Users/hiennguyen/english_teacher_hub/.agents/rules/04-testing.md): Requirements for unit testing, error prevention, and compilation checks.
+
+### 🛠 Skills
+The following skills are available in `.agents/skills/` to assist you in complex procedures:
+- **`run-tests`**: A runbook for executing the Vitest test suite and debugging common React Testing Library errors.
+
+## Execution Mandate
+Whenever you start a task, briefly refer to this architecture. Adhere to the designated rules above. If your solution violates `01-ui-ux.md` (by making the app look cheap) or `03-i18n-bilingual.md` (by hardcoding text), you have failed the task.
+
+Work meticulously, write clean code, and deliver premium results!
