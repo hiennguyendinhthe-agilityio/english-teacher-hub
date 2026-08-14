@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   UploadCloud, CheckCircle, Sparkles, Loader2, ArrowRight, 
   PlayCircle, Tv, FileText, Download, RotateCcw, BookOpen, 
-  Layers, Check, Copy
+  Layers, Check, Copy, FileUp, X, FileCode
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateLessonFromText } from '../services/aiService';
 import InteractiveLesson from './InteractiveLesson';
 import ClassroomPresenter from './ClassroomPresenter';
 import { exportToAnkiCsv, exportLessonToWordDoc } from '../utils/exportUtils';
 import { soundFX } from '../services/soundEffects';
+import { cn } from '@/lib/utils';
 
 const SAMPLE_PRESETS_VI = [
   {
@@ -148,12 +150,16 @@ export default function AIImporter({ setActiveTab }) {
   const { t, lang } = useLanguage();
   const samplePresets = lang === 'en' ? SAMPLE_PRESETS_EN : SAMPLE_PRESETS_VI;
   const [text, setText] = useState('');
+  const [inputMode, setInputMode] = useState('paste');
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [generatedLesson, setGeneratedLesson] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showPresenter, setShowPresenter] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleProcess = async () => {
     if (!text.trim()) return;
@@ -175,12 +181,69 @@ export default function AIImporter({ setActiveTab }) {
 
   const handleApplyPreset = (presetContent) => {
     setText(presetContent);
+    setUploadedFile(null);
     setError('');
     soundFX.playFlip();
   };
 
+  const readFileContent = (file) => {
+    if (!file) return;
+    setUploadedFile(file);
+    setError('');
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target.result;
+      if (typeof content === 'string') {
+        setText(content);
+        soundFX.playFlip();
+      }
+    };
+    reader.onerror = () => {
+      setError('Failed to read file');
+      soundFX.playError();
+    };
+
+    // Read as plain text (supports .txt, .md, .csv, .json, and plain docx text)
+    reader.readAsText(file);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      readFileContent(file);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      readFileContent(file);
+    }
+  };
+
+  const removeFile = () => {
+    setUploadedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const reset = () => {
     setText('');
+    setUploadedFile(null);
     setIsSuccess(false);
     setGeneratedLesson(null);
     setShowPreview(false);
@@ -197,24 +260,24 @@ export default function AIImporter({ setActiveTab }) {
   }
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto px-1 sm:px-4">
       {/* Header Banner */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-3 text-emerald-600 dark:text-emerald-500 flex items-center justify-center gap-3">
-          <Sparkles size={36} className="text-emerald-500 animate-pulse" /> {t('impTitle')}
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-3 text-emerald-600 dark:text-emerald-500 flex items-center justify-center gap-2.5">
+          <Sparkles size={32} className="text-emerald-500 animate-pulse shrink-0" /> {t('impTitle')}
         </h1>
-        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           {t('impSub')}
         </p>
       </div>
 
       {!isSuccess ? (
-        <Card className="bg-white/60 dark:bg-black/20 backdrop-blur-sm border-border/60 shadow-xl overflow-hidden rounded-2xl">
-          <CardContent className="p-6 sm:p-8 md:p-10">
+        <Card className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm border-border/70 shadow-xl overflow-hidden rounded-2xl">
+          <CardContent className="p-4 sm:p-6 md:p-8">
             {/* Quick Sample Presets */}
-            <div className="mb-6 bg-emerald-50/60 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
-              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 block mb-2.5 flex items-center gap-1.5">
-                <Sparkles size={16} /> {t('impSamplesTitle')}
+            <div className="mb-6 bg-emerald-50/70 dark:bg-emerald-950/25 p-3.5 sm:p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+              <span className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400 block mb-2 flex items-center gap-1.5">
+                <Sparkles size={15} /> {t('impSamplesTitle')}
               </span>
               <div className="flex flex-wrap gap-2">
                 {samplePresets.map((preset) => (
@@ -224,7 +287,7 @@ export default function AIImporter({ setActiveTab }) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleApplyPreset(preset.content)}
-                    className="rounded-lg text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-800 transition-all border-emerald-200 dark:border-emerald-800/60"
+                    className="rounded-lg text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-800 transition-all border-emerald-200 dark:border-emerald-800/60 h-8 px-2.5"
                   >
                     + {t(preset.labelKey)}
                   </Button>
@@ -232,50 +295,150 @@ export default function AIImporter({ setActiveTab }) {
               </div>
             </div>
 
-            {/* Input Textarea */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <Label className="text-base sm:text-lg font-bold text-foreground">
-                  {t('impPasteLabel')}
-                </Label>
-                {text && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setText('')} 
-                    className="text-xs text-muted-foreground hover:text-destructive h-7"
-                  >
-                    <RotateCcw size={12} className="mr-1" /> {t('impClearBtn')}
-                  </Button>
+            {/* Input Mode Selector Tabs */}
+            <div className="flex items-center gap-2 p-1 bg-secondary/50 rounded-xl w-fit mb-5 border border-border/50">
+              <button
+                type="button"
+                onClick={() => setInputMode('paste')}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5",
+                  inputMode === 'paste' 
+                    ? "bg-white dark:bg-slate-800 text-foreground shadow-xs font-bold" 
+                    : "text-muted-foreground hover:text-foreground"
                 )}
-              </div>
-              <Textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={t('impPlaceholder')}
-                disabled={isProcessing}
-                className="w-full min-h-[300px] p-5 font-mono text-sm leading-relaxed resize-y bg-secondary/30 focus-visible:bg-background border-2 border-dashed border-border/80 focus-visible:border-emerald-500 rounded-xl transition-all duration-300"
-              />
-              {error && <p className="text-red-500 mt-2 text-sm font-medium">{error}</p>}
+              >
+                <FileCode size={15} /> {t('impPasteTab')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setInputMode('upload')}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5",
+                  inputMode === 'upload' 
+                    ? "bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs font-bold" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <FileUp size={15} /> {t('impUploadTab')}
+              </button>
             </div>
 
+            {/* Mode 1: Paste Text */}
+            {inputMode === 'paste' && (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <Label className="text-sm sm:text-base font-bold text-foreground">
+                    {t('impPasteLabel')}
+                  </Label>
+                  {text && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setText('')} 
+                      className="text-xs text-muted-foreground hover:text-destructive h-7 px-2"
+                    >
+                      <RotateCcw size={12} className="mr-1" /> {t('impClearBtn')}
+                    </Button>
+                  )}
+                </div>
+                <Textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={t('impPlaceholder')}
+                  disabled={isProcessing}
+                  className="w-full min-h-[260px] sm:min-h-[320px] p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed resize-y bg-secondary/30 focus-visible:bg-background border-2 border-dashed border-border/80 focus-visible:border-emerald-500 rounded-xl transition-all duration-300"
+                />
+              </div>
+            )}
+
+            {/* Mode 2: Drag & Drop File Upload */}
+            {inputMode === 'upload' && (
+              <div>
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "w-full min-h-[220px] sm:min-h-[260px] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-200",
+                    isDragging 
+                      ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/40 scale-[0.99]" 
+                      : "border-border/80 hover:border-emerald-500 hover:bg-secondary/30 bg-secondary/15"
+                  )}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".txt,.md,.docx,.pdf,.csv,.json"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mb-3 shadow-inner">
+                    <UploadCloud size={30} />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-foreground mb-1">
+                    {t('impDropzoneText')}
+                  </h3>
+                  <p className="text-xs text-muted-foreground max-w-md mb-4">
+                    {t('impDropzoneSub')}
+                  </p>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    className="rounded-xl font-semibold border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 pointer-events-none"
+                  >
+                    <FileUp size={15} className="mr-1.5" /> {t('impUploadBtn')}
+                  </Button>
+                </div>
+
+                {/* Uploaded File Chip & Text Preview */}
+                {uploadedFile && (
+                  <div className="mt-4 p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <FileText size={18} className="text-emerald-600 shrink-0" />
+                      <div className="min-w-0">
+                        <span className="text-xs sm:text-sm font-bold text-foreground truncate block">
+                          {uploadedFile.name}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {(uploadedFile.size / 1024).toFixed(1)} KB · {t('impFileLoaded')}
+                        </span>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={(e) => { e.stopPropagation(); removeFile(); }}
+                      className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive shrink-0"
+                      title={t('impRemoveFile')}
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {error && <p className="text-red-500 mb-4 text-xs sm:text-sm font-medium">{error}</p>}
+
             {/* Submit Bar */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2 border-t border-border/50">
-              <span className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <UploadCloud size={18} className="text-emerald-500" /> {t('impSupportText')}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-3 border-t border-border/50">
+              <span className="text-xs text-muted-foreground flex items-center gap-2 text-center sm:text-left">
+                <UploadCloud size={16} className="text-emerald-500 shrink-0 hidden sm:inline" /> {t('impSupportText')}
               </span>
               <Button
                 onClick={handleProcess}
                 disabled={isProcessing || !text.trim()}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 h-auto text-base sm:text-lg rounded-xl shadow-lg shadow-emerald-500/20 font-bold transition-all hover:-translate-y-0.5"
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-5 h-auto text-sm sm:text-base rounded-xl shadow-lg shadow-emerald-500/20 font-bold transition-all hover:-translate-y-0.5"
               >
                 {isProcessing ? (
-                  <span className="flex items-center gap-3">
-                    <Loader2 size={22} className="animate-spin" /> {t('impProcessing')}
+                  <span className="flex items-center gap-2">
+                    <Loader2 size={18} className="animate-spin" /> {t('impProcessing')}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-3">
-                    <Sparkles size={20} /> {t('impGenerateBtn')} <ArrowRight size={18} />
+                  <span className="flex items-center gap-2">
+                    <Sparkles size={18} /> {t('impGenerateBtn')} <ArrowRight size={16} />
                   </span>
                 )}
               </Button>
@@ -287,73 +450,74 @@ export default function AIImporter({ setActiveTab }) {
         <div className="space-y-6 animate-in zoom-in-95 duration-500">
           <Card className="bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-900/40 shadow-2xl overflow-hidden relative rounded-2xl">
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
-            <CardContent className="p-8 sm:p-10">
-              <div className="flex flex-col sm:flex-row items-center justify-between pb-6 mb-6 border-b border-border/50 gap-4">
-                <div className="flex items-center gap-4 text-center sm:text-left">
-                  <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
-                    <CheckCircle size={36} />
+            <CardContent className="p-4 sm:p-8 md:p-10">
+              {/* Header Info */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 mb-6 border-b border-border/50 gap-4">
+                <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                    <CheckCircle size={28} />
                   </div>
-                  <div>
-                    <Badge className="bg-emerald-600 text-white font-bold mb-1.5">
+                  <div className="min-w-0 flex-1">
+                    <Badge className="bg-emerald-600 text-white font-bold mb-1 text-xs">
                       ✓ {t('impSuccessTitle')}
                     </Badge>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight break-words">
                       {generatedLesson?.title}
                     </h2>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="w-full sm:w-auto flex justify-end shrink-0">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={reset} 
-                    className="rounded-xl font-semibold border-border/80 hover:bg-secondary"
+                    className="w-full sm:w-auto rounded-xl font-semibold border-border/80 hover:bg-secondary h-9"
                   >
-                    <RotateCcw size={16} className="mr-1.5" /> {t('impAnotherBtn')}
+                    <RotateCcw size={15} className="mr-1.5" /> {t('impAnotherBtn')}
                   </Button>
                 </div>
               </div>
 
               {/* Metrics Summary Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                <div className="bg-emerald-50/50 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 text-center">
-                  <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 block mb-1">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
+                <div className="bg-emerald-50/50 dark:bg-emerald-950/20 p-3 sm:p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 text-center min-w-0 overflow-hidden">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-emerald-600 dark:text-emerald-400 block mb-0.5">
                     {generatedLesson?.vocabulary?.length || 0}
                   </span>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-tight block break-words">
                     {t('impVocabExtracted')}
                   </span>
                 </div>
-                <div className="bg-indigo-50/50 dark:bg-indigo-950/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/30 text-center">
-                  <span className="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400 block mb-1">
+                <div className="bg-indigo-50/50 dark:bg-indigo-950/20 p-3 sm:p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/30 text-center min-w-0 overflow-hidden">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-indigo-600 dark:text-indigo-400 block mb-0.5">
                     {generatedLesson?.grammar?.length || 0}
                   </span>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-tight block break-words">
                     {t('impGrammarExtracted')}
                   </span>
                 </div>
-                <div className="bg-purple-50/50 dark:bg-purple-950/20 p-4 rounded-xl border border-purple-100 dark:border-purple-900/30 text-center">
-                  <span className="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400 block mb-1">
+                <div className="bg-purple-50/50 dark:bg-purple-950/20 p-3 sm:p-4 rounded-xl border border-purple-100 dark:border-purple-900/30 text-center min-w-0 overflow-hidden">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-purple-600 dark:text-purple-400 block mb-0.5">
                     {generatedLesson?.phonetics?.length || 0}
                   </span>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-tight block break-words">
                     {t('impPhoneticsExtracted')}
                   </span>
                 </div>
-                <div className="bg-amber-50/50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30 text-center">
-                  <span className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 block mb-1">
+                <div className="bg-amber-50/50 dark:bg-amber-950/20 p-3 sm:p-4 rounded-xl border border-amber-100 dark:border-amber-900/30 text-center min-w-0 overflow-hidden">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black text-amber-600 dark:text-amber-400 block mb-0.5">
                     {generatedLesson?.practice?.length || 0}
                   </span>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider leading-tight block break-words">
                     {t('impPracticeExtracted')}
                   </span>
                 </div>
               </div>
 
               {/* Quick Vocabulary Preview Chips */}
-              <div className="mb-8 bg-secondary/30 p-5 rounded-2xl border border-border/60">
-                <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <div className="mb-6 bg-secondary/30 p-4 sm:p-5 rounded-2xl border border-border/60">
+                <h3 className="text-xs sm:text-sm font-bold text-foreground mb-3 flex items-center gap-2">
                   <Layers size={16} className="text-emerald-500" /> {t('impVocabExtracted')} ({generatedLesson?.vocabulary?.length || 0}):
                 </h3>
                 <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
@@ -361,47 +525,51 @@ export default function AIImporter({ setActiveTab }) {
                     <Badge 
                       key={i} 
                       variant="secondary"
-                      className="px-3 py-1.5 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-border/80 shadow-xs flex items-center gap-1.5"
+                      className="px-2.5 py-1.5 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-border/80 shadow-xs inline-flex flex-wrap items-center gap-1 max-w-full"
                     >
                       <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{v.word}</strong>
-                      <span className="text-muted-foreground text-xs italic">{v.type}</span>
-                      <span className="text-foreground/80">: {v.meaning}</span>
+                      <span className="text-muted-foreground text-[11px] italic">{v.type}</span>
+                      <span className="text-foreground/80 break-words">: {v.meaning}</span>
                     </Badge>
                   ))}
                 </div>
               </div>
 
-              {/* Action Buttons Grid */}
+              {/* Responsive Action Buttons Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
                 <Button 
                   onClick={() => setShowPreview(true)} 
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white py-6 h-auto rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all text-sm sm:text-base flex items-center justify-center gap-2"
+                  className="w-full py-4 px-3 h-auto min-h-[50px] bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 text-center whitespace-normal leading-snug"
                 >
-                  <PlayCircle size={20} /> {t('impPreviewBtn')}
+                  <PlayCircle size={18} className="shrink-0" /> 
+                  <span className="break-words">{t('impPreviewBtn')}</span>
                 </Button>
 
                 <Button 
                   onClick={() => setShowPresenter(true)} 
                   variant="outline"
-                  className="py-6 h-auto rounded-xl font-bold border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:-translate-y-0.5 transition-all text-sm sm:text-base flex items-center justify-center gap-2"
+                  className="w-full py-4 px-3 h-auto min-h-[50px] rounded-xl font-bold border-indigo-300 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:-translate-y-0.5 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 text-center whitespace-normal leading-snug"
                 >
-                  <Tv size={20} /> {t('impPresenterBtn')}
+                  <Tv size={18} className="shrink-0" /> 
+                  <span className="break-words">{t('impPresenterBtn')}</span>
                 </Button>
 
                 <Button 
                   variant="outline"
                   onClick={() => exportLessonToWordDoc(generatedLesson)}
-                  className="py-6 h-auto rounded-xl font-semibold border-border/80 hover:bg-secondary hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
+                  className="w-full py-4 px-3 h-auto min-h-[50px] rounded-xl font-semibold border-border/80 hover:bg-secondary hover:-translate-y-0.5 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 text-center whitespace-normal leading-snug"
                 >
-                  <FileText size={18} className="text-blue-500" /> {t('impExportWord')}
+                  <FileText size={17} className="text-blue-500 shrink-0" /> 
+                  <span className="break-words">{t('impExportWord')}</span>
                 </Button>
 
                 <Button 
                   variant="outline"
                   onClick={() => exportToAnkiCsv(generatedLesson.vocabulary, generatedLesson.title)}
-                  className="py-6 h-auto rounded-xl font-semibold border-border/80 hover:bg-secondary hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2"
+                  className="w-full py-4 px-3 h-auto min-h-[50px] rounded-xl font-semibold border-border/80 hover:bg-secondary hover:-translate-y-0.5 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 text-center whitespace-normal leading-snug"
                 >
-                  <Download size={18} className="text-purple-500" /> {t('impExportAnki')}
+                  <Download size={17} className="text-purple-500 shrink-0" /> 
+                  <span className="break-words">{t('impExportAnki')}</span>
                 </Button>
               </div>
             </CardContent>

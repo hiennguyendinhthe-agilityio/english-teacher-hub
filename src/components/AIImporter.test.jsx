@@ -13,11 +13,12 @@ const renderComponent = () => {
 };
 
 describe('AIImporter Component', () => {
-  it('renders AI Importer with sample presets and textarea', () => {
+  it('renders AI Importer with sample presets, tabs, and textarea', () => {
     renderComponent();
     expect(screen.getByText(/Trợ Lý Nhập Giáo Án AI|AI Lesson Importer/i)).toBeInTheDocument();
     expect(screen.getByText(/Mẫu Giáo Án Nhanh|Quick Sample Presets/i)).toBeInTheDocument();
     expect(screen.getByText(/Unit 6: Dịch Vụ Cộng Đồng|Unit 6: Community Service/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tải File Lên|Upload Document/i)).toBeInTheDocument();
   });
 
   it('applies sample preset to textarea when clicked', () => {
@@ -30,7 +31,15 @@ describe('AIImporter Component', () => {
     expect(textarea.value).toContain('volunteer');
   });
 
-  it('generates structured lesson and displays extracted dashboard', async () => {
+  it('switches to file upload tab and shows drag-and-drop dropzone', () => {
+    renderComponent();
+    const uploadTabBtn = screen.getByText(/Tải File Lên|Upload Document/i);
+    fireEvent.click(uploadTabBtn);
+
+    expect(screen.getByText(/Kéo thả file vào đây|Drag & drop your file here/i)).toBeInTheDocument();
+  });
+
+  it('generates structured lesson and displays responsive extracted dashboard', async () => {
     renderComponent();
     const presetBtn = screen.getByText(/Unit 6: Dịch Vụ Cộng Đồng|Unit 6: Community Service/i);
     fireEvent.click(presetBtn);
