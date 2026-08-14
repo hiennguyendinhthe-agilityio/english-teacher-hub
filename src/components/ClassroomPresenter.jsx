@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ClassroomTimer from './ClassroomTimer';
 import { soundFX } from '../services/soundEffects';
+import { getLocalizedLesson } from '../utils/lessonTranslator';
 import { cn } from '@/lib/utils';
 
-export default function ClassroomPresenter({ lessonData, onExit }) {
-  const { t } = useLanguage();
+export default function ClassroomPresenter({ lessonData: rawLessonData, onExit }) {
+  const { t, lang } = useLanguage();
+  const lessonData = getLocalizedLesson(rawLessonData, lang);
   const [slideIndex, setSlideIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [laserActive, setLaserActive] = useState(false);

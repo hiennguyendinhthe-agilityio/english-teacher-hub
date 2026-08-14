@@ -14,10 +14,12 @@ import VocabularyMatchingGame from './VocabularyMatchingGame';
 import ClassroomTimer from './ClassroomTimer';
 import { exportToAnkiCsv, exportLessonToWordDoc } from '../utils/exportUtils';
 import { soundFX } from '../services/soundEffects';
+import { getLocalizedLesson } from '../utils/lessonTranslator';
 import { cn } from '@/lib/utils';
 
-export default function InteractiveLesson({ lessonData, onBack }) {
-  const { t } = useLanguage();
+export default function InteractiveLesson({ lessonData: rawLessonData, onBack }) {
+  const { t, lang } = useLanguage();
+  const lessonData = getLocalizedLesson(rawLessonData, lang);
   const [flippedCards, setFlippedCards] = useState({});
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
