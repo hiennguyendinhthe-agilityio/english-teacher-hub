@@ -4,6 +4,31 @@ import { describe, it, expect, vi } from 'vitest';
 import AIImporter from './AIImporter';
 import { LanguageProvider } from '../context/LanguageContext';
 
+// Mock generateLessonFromText so no real API calls are made in unit tests
+vi.mock('../services/aiService', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    generateLessonFromText: vi.fn().mockResolvedValue({
+      id: 'unit-6-community-service',
+      title: 'Unit 6: COMMUNITY SERVICE & VOLUNTEERING',
+      vocabulary: [
+        { word: 'volunteer', type: '(v)', transcription: '/ˌvɒl.ənˈtɪər/', meaning: 'tình nguyện viên' },
+        { word: 'charity', type: '(n)', transcription: '/ˈtʃær.ɪ.ti/', meaning: 'tổ chức từ thiện' },
+        { word: 'donate', type: '(v)', transcription: '/dəʊˈneɪt/', meaning: 'quyên góp' },
+      ],
+      grammar: [{
+        title: 'I. Present Perfect Tense',
+        sections: [{ subtitle: 'Usage', points: ['Used for actions completed at an unspecified time.'], formulas: [], tags: [] }]
+      }],
+      phonetics: [{ title: 'Sounds /t/, /d/, /ɪd/', description: 'For -ed endings', examples: [] }],
+      practice: [
+        { id: 1, question: 'Which word means "to give money to help others"?', options: ['volunteer', 'donate', 'charity', 'community'], correctAnswer: 1, explanation: 'Donate means to give money or goods.' }
+      ]
+    })
+  };
+});
+
 const renderComponent = () => {
   return render(
     <LanguageProvider>
