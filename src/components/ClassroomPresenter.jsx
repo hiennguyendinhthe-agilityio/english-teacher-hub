@@ -216,15 +216,15 @@ export default function ClassroomPresenter({ lessonData: rawLessonData, onExit }
             <div className="flex justify-center gap-6">
               <div className="bg-slate-900/80 border border-slate-800 px-8 py-5 rounded-2xl">
                 <div className="text-3xl font-black text-indigo-400">{currentSlide.vocabCount}</div>
-                <div className="text-xs uppercase tracking-wider text-slate-400 font-semibold mt-1">Từ Vựng</div>
+                <div className="text-xs uppercase tracking-wider text-slate-400 font-semibold mt-1">{t('cpVocabCount')}</div>
               </div>
               <div className="bg-slate-900/80 border border-slate-800 px-8 py-5 rounded-2xl">
                 <div className="text-3xl font-black text-purple-400">{currentSlide.grammarCount}</div>
-                <div className="text-xs uppercase tracking-wider text-slate-400 font-semibold mt-1">Chủ Điểm Ngữ Pháp</div>
+                <div className="text-xs uppercase tracking-wider text-slate-400 font-semibold mt-1">{t('cpGrammarCount')}</div>
               </div>
             </div>
             <p className="text-xs text-slate-500 mt-10">
-              Nhấn phím <kbd className="bg-slate-800 px-2 py-1 rounded text-slate-300">Space</kbd> hoặc <kbd className="bg-slate-800 px-2 py-1 rounded text-slate-300">→</kbd> để bắt đầu bài giảng
+              {t('cpStartPrompt')}
             </p>
           </div>
         )}
@@ -278,13 +278,13 @@ export default function ClassroomPresenter({ lessonData: rawLessonData, onExit }
                 </p>
               </div>
 
-              {/* BACK (Vietnamese Meaning) */}
+              {/* BACK (Meaning / Definition) */}
               <div 
                 className="absolute inset-0 [backface-visibility:hidden] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-10 sm:p-16 flex flex-col items-center justify-center shadow-2xl text-center [transform:rotateY(180deg)] border-2 border-white/20"
               >
-                <div className="text-5xl mb-4">🇻🇳</div>
+                <div className="text-5xl mb-4">{lang === 'en' ? '🇬🇧' : '🇻🇳'}</div>
                 <span className="text-xs uppercase tracking-[0.25em] text-white/80 font-bold mb-4">
-                  {t('cpVietnameseMeaning')}
+                  {lang === 'en' ? t('cpMeaningLabel') : t('cpVietnameseMeaning')}
                 </span>
                 <h3 className="text-4xl sm:text-6xl font-black text-white mb-6 drop-shadow-lg leading-tight">
                   {currentSlide.data.meaning}

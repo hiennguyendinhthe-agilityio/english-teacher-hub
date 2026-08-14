@@ -18,7 +18,7 @@ function shuffleArray(arr) {
 }
 
 export default function VocabularyMatchingGame({ vocabulary = [], unitTitle = '' }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [cards, setCards] = useState([]);
   const [selectedCards, setSelectedCards] = useState([]);
   const [matchedIds, setMatchedIds] = useState(new Set());
@@ -278,7 +278,7 @@ export default function VocabularyMatchingGame({ vocabulary = [], unitTitle = ''
                         isSelected ? "bg-white/20 text-white" : ""
                       )}
                     >
-                      {card.type === 'en' ? 'EN' : 'VN'}
+                      {card.type === 'en' ? 'EN' : (lang === 'en' ? 'DEF' : 'VN')}
                     </Badge>
                   </div>
 

@@ -18,3 +18,9 @@ These rules apply to all tasks in this workspace to ensure the highest standards
 ## 4. Agentic Workflow
 - Always verify the state of a file using `view_file` or `grep_search` before making an assumption about its contents.
 - Do not use generic tools like `cat`, `grep`, or `sed` via `run_command`. Stick to `view_file`, `grep_search`, `replace_file_content`.
+
+## 5. Strict Zero-Hardcoded Text & 100% Bilingual Parity (EN / VI)
+- **Zero Hardcoded Strings:** NEVER hardcode Vietnamese or English raw text directly in JSX templates, button labels, placeholders, input hints, tooltips, sample presets, or badge text.
+- **Mandatory i18n Dictionary Lookup:** ALL user-facing UI text MUST use `t('key')` from `useLanguage()` and have full, accurate definitions in BOTH `translations.vi` and `translations.en` inside `src/services/i18n.js`.
+- **Lesson Data Dynamic Localization:** When rendering curriculum or lesson content (`grammar`, `phonetics`, `vocabulary`), always pass the data through `getLocalizedLesson(rawLessonData, lang)` so grammar explanations, formula labels (`Affirmative (+)`, `Negative (-)`), and word definitions dynamically switch to English/Vietnamese with ZERO language leakage.
+- **Bilingual Verification:** Always verify and test both `English` and `Tiếng Việt` language states before finalizing any implementation.

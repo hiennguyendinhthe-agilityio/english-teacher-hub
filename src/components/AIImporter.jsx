@@ -16,7 +16,7 @@ import ClassroomPresenter from './ClassroomPresenter';
 import { exportToAnkiCsv, exportLessonToWordDoc } from '../utils/exportUtils';
 import { soundFX } from '../services/soundEffects';
 
-const SAMPLE_PRESETS = [
+const SAMPLE_PRESETS_VI = [
   {
     key: 'community',
     labelKey: 'impSample1',
@@ -80,8 +80,73 @@ GRAMMAR: First Conditional with Modal Verbs in Business
   }
 ];
 
+const SAMPLE_PRESETS_EN = [
+  {
+    key: 'community',
+    labelKey: 'impSample1',
+    content: `Unit 6: COMMUNITY SERVICE & VOLUNTEERING
+VOCABULARY
+volunteer (n, v): person working willingly without payment
+donate (v): give money or goods to help others
+community service (n): unpaid work intended to help people in the area
+orphanage (n): residential institution for the care of orphans
+elderly people (n): old people considered as a group
+recycle (v): convert waste into reusable material
+encourage (v): give support, confidence, or hope
+
+GRAMMAR: The Past Simple Tense
+- Usage: Expresses completed actions at a specific time in the past.
+- Affirmative (+): S + V2/ed (E.g., We collected warm clothes yesterday)
+- Negative (-): S + did not + V (base) (E.g., They didn't go to the shelter)
+- Interrogative (?): Did + S + V (base)? (E.g., Did you donate books?)
+
+PHONETICS: Pronunciation of -ed endings (/t/, /d/, /ɪd/)
+- /t/ after voiceless consonants: helped, cooked
+- /d/ after voiced consonants: cleaned, volunteered
+- /ɪd/ after /t/ and /d/: donated, needed`
+  },
+  {
+    key: 'aiTech',
+    labelKey: 'impSample2',
+    content: `Special Unit: ARTIFICIAL INTELLIGENCE & FUTURE TECH
+VOCABULARY
+artificial intelligence (n): computer systems able to perform human tasks
+automation (n): use of automatic equipment in manufacturing/processes
+algorithm (n): process or set of rules followed in calculations
+breakthrough (n): sudden, dramatic, and important discovery
+innovative (adj): featuring new methods; advanced and original
+transform (v): make a thorough or dramatic change
+virtual reality (n): computer-generated simulation of a 3D image/environment
+efficient (adj): achieving maximum productivity with minimum wasted effort
+
+GRAMMAR: Modal Verbs for Future Possibility (May / Might / Could)
+- Usage: Expressing hypothetical future scenarios and predictions.
+- Structure: Subject + may/might/could + Verb (base form)
+- Example: AI systems might revolutionize medical diagnosis in the coming decade.`
+  },
+  {
+    key: 'business',
+    labelKey: 'impSample3',
+    content: `Mastery Unit: BUSINESS ENGLISH & JOB INTERVIEWS
+VOCABULARY
+candidate (n): person who applies for a job or vacancy
+qualification (n): official pass in an exam or course of study
+interpersonal skills (n): skills used to interact and communicate with others
+negotiate (v): obtain or bring about by discussion
+responsibility (n): state of having a duty to deal with something
+collaborate (v): work jointly on an activity or project
+achieve (v): successfully bring about or reach a goal
+professional (adj): competent or skilled in a field of work
+
+GRAMMAR: First Conditional with Business Modal Verbs
+- Formula: If + Subject + Present Simple, Subject + can/should/must + V (base)
+- Example: If you showcase practical achievements, you can impress the interviewer.`
+  }
+];
+
 export default function AIImporter({ setActiveTab }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const samplePresets = lang === 'en' ? SAMPLE_PRESETS_EN : SAMPLE_PRESETS_VI;
   const [text, setText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -152,7 +217,7 @@ export default function AIImporter({ setActiveTab }) {
                 <Sparkles size={16} /> {t('impSamplesTitle')}
               </span>
               <div className="flex flex-wrap gap-2">
-                {SAMPLE_PRESETS.map((preset) => (
+                {samplePresets.map((preset) => (
                   <Button
                     key={preset.key}
                     type="button"
@@ -180,14 +245,14 @@ export default function AIImporter({ setActiveTab }) {
                     onClick={() => setText('')} 
                     className="text-xs text-muted-foreground hover:text-destructive h-7"
                   >
-                    <RotateCcw size={12} className="mr-1" /> Xóa nội dung
+                    <RotateCcw size={12} className="mr-1" /> {t('impClearBtn')}
                   </Button>
                 )}
               </div>
               <Textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Ví dụ dán nội dung giáo án:&#10;Unit 6: COMMUNITY SERVICE&#10;VOCABULARY&#10;volunteer (v): tình nguyện&#10;donate (v): quyên góp..."
+                placeholder={t('impPlaceholder')}
                 disabled={isProcessing}
                 className="w-full min-h-[300px] p-5 font-mono text-sm leading-relaxed resize-y bg-secondary/30 focus-visible:bg-background border-2 border-dashed border-border/80 focus-visible:border-emerald-500 rounded-xl transition-all duration-300"
               />
@@ -197,7 +262,7 @@ export default function AIImporter({ setActiveTab }) {
             {/* Submit Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2 border-t border-border/50">
               <span className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <UploadCloud size={18} className="text-emerald-500" /> Hỗ trợ văn bản thuần, Markdown hoặc bản chép từ file Word/PDF.
+                <UploadCloud size={18} className="text-emerald-500" /> {t('impSupportText')}
               </span>
               <Button
                 onClick={handleProcess}
