@@ -26,14 +26,14 @@ function toFlashcards(vocab) {
     word: v.word,
     ipa: v.transcription || '',
     partOfSpeech: v.type || '',
-    vietnameseMeaning: v.meaning || '',
+    meaning: v.meaning || '',
   }));
 }
 
 const SWIPE_THRESHOLD = 100;
 
 // Individual swipeable card
-function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t }) {
+function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, language }) {
   const [dragX, setDragX] = useState(0);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -233,10 +233,12 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t }) {
             {t('fcMeaningDef')}
           </span>
 
-          <div className="text-6xl mb-4 select-none">🇻🇳</div>
+          <div className="text-6xl mb-4 select-none">
+            {language === 'vi' ? '🇻🇳' : '🇬🇧'}
+          </div>
 
           <h3 className="text-3xl md:text-4xl text-white font-extrabold text-center mb-3 drop-shadow-lg leading-tight select-none">
-            {card.vietnameseMeaning}
+            {card.meaning}
           </h3>
 
           <p className="text-base text-white/80 font-mono mb-6 select-none">
@@ -253,7 +255,7 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t }) {
 }
 
 export default function FlashcardBuilder() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [topic, setTopic] = useState('Unit 1: MY NEW SCHOOL');
   const [allCards, setAllCards] = useState(() => toFlashcards(unit1Data.vocabulary));
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -419,6 +421,7 @@ export default function FlashcardBuilder() {
                       onSwipeLeft={goNext}
                       onSwipeRight={goNext}
                       t={t}
+                      language={language}
                     />
                   );
                 })}
