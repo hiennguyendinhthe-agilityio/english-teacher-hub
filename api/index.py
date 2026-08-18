@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-api_key = os.getenv("GEMINI_API_KEY")
+
 
 SYSTEM_INSTRUCTION = """Bạn là Trợ lý AI ảo của "Ms Van's English Class" - một nền tảng E-Learning và công cụ hỗ trợ giảng dạy tiếng Anh hiện đại.
 Nhiệm vụ của bạn là:
@@ -50,6 +50,7 @@ def read_root():
 
 @app.post("/api/chat")
 async def chat_with_ai(request: ChatRequest):
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise HTTPException(status_code=500, detail="Chưa cấu hình GEMINI_API_KEY trên Server")
         
