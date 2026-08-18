@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 const cleanQuestionPrompt = (rawPrompt) => {
   let prompt = (rawPrompt || "").trim();
   prompt = prompt
-    .replace(/^(?:\d+\.\s*)?(?:Question\s*\d+.*?:\s*|Q\d+:\s*)/i, '')
+    .replace(/^(?:(?:\d+\.)+\s*|Question\s*\d+.*?:\s*|Q\d+:\s*)+/i, '')
     .replace(/^(?:\[[A-Z0-9]+\]\s*:?\s*)/i, '')
     .replace(/^(?:Fill in the blank[s]?\s*:?\s*)/i, '')
     .replace(/^[-:.]\s*/, '')
