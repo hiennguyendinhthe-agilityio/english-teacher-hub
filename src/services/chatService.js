@@ -25,8 +25,11 @@ export const sendChatMessage = async (chatHistory, newMessage) => {
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
+    // Lọc bỏ câu chào mặc định đầu tiên của AI vì Gemini bắt buộc lịch sử phải bắt đầu từ 'user'
+    const validHistory = chatHistory.filter((msg, index) => !(index === 0 && msg.role === 'ai'));
+
     // Map existing history
-    const contents = chatHistory.map(msg => ({
+    const contents = validHistory.map(msg => ({
       role: msg.role === 'ai' ? 'model' : 'user',
       parts: [{ text: msg.text }]
     }));
