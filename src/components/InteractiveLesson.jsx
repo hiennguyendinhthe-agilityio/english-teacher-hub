@@ -370,13 +370,10 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
 
         {/* ── 4. PRACTICE TAB ── */}
         <TabsContent value="practice" className="min-h-[500px]">
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 items-start relative">
-            
-            {/* Main Content Area */}
-            <div className="flex-1 w-full max-w-4xl">
-              <h2 className="text-2xl font-bold mb-8 text-center text-indigo-600 lg:text-left">
-                {t('ilPracticeTitle')}
-              </h2>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-8 text-center text-indigo-600">
+              {t('ilPracticeTitle')}
+            </h2>
               
               {practiceSections.map((section, sIdx) => (
                 <div key={sIdx} id={`practice-section-${sIdx}`} className="mb-10 scroll-mt-24">
@@ -492,16 +489,22 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
                 </Button>
               </div>
             )}
-            </div>
 
-            {/* Quick Navigation Sidebar (Hidden on Mobile) */}
+            {/* Quick Navigation Sidebar (Floating, Hover-to-expand) */}
             {practiceSections.length > 1 && (
-              <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24">
-                <div className="bg-white dark:bg-zinc-900 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl shadow-sm overflow-hidden">
+              <div className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-50 group">
+                {/* Visible handle / collapsed state */}
+                <div className="bg-indigo-600 text-white w-10 py-6 rounded-l-xl shadow-lg flex flex-col items-center justify-center cursor-pointer transition-transform group-hover:translate-x-full">
+                  <BookOpen size={20} className="mb-2" />
+                  <span className="text-xs font-bold writing-vertical" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>MỤC LỤC</span>
+                </div>
+                
+                {/* Expanded state on hover */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-900 border-y border-l border-indigo-200 dark:border-indigo-900/50 shadow-2xl rounded-l-2xl w-64 translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out overflow-hidden">
                   <div className="bg-indigo-50 dark:bg-indigo-900/20 px-4 py-3 border-b border-indigo-100 dark:border-indigo-900/40 font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-2">
                     <BookOpen size={18} /> Mục lục Bài tập
                   </div>
-                  <div className="p-2 space-y-1">
+                  <div className="p-2 space-y-1 max-h-[60vh] overflow-y-auto">
                     {practiceSections.map((section, idx) => (
                       <button
                         key={idx}
@@ -517,9 +520,8 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
                     ))}
                   </div>
                 </div>
-              </aside>
+              </div>
             )}
-            
           </div>
         </TabsContent>
       </Tabs>
