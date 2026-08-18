@@ -79,57 +79,57 @@ function AppLayout() {
   };
 
   return (
-    <LanguageProvider>
-      <div className="flex h-screen overflow-hidden bg-background">
-        {/* Navigation Sidebar */}
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Navigation Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        openSettings={() => setIsSettingsOpen(true)}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <Header
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
           openSettings={() => setIsSettingsOpen(true)}
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
         />
-
-        {/* Main Content Area */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <Header
-            isDarkMode={isDarkMode}
-            setIsDarkMode={setIsDarkMode}
-            openSettings={() => setIsSettingsOpen(true)}
-          />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            {renderContent()}
-          </main>
-        </div>
-
-        {/* Lazy Loaded Settings Modal */}
-        {isSettingsOpen && (
-          <Suspense fallback={null}>
-            <SettingsModal
-              isOpen={isSettingsOpen}
-              onClose={() => setIsSettingsOpen(false)}
-            />
-          </Suspense>
-        )}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          {renderContent()}
+        </main>
       </div>
-    </LanguageProvider>
+
+      {/* Lazy Loaded Settings Modal */}
+      {isSettingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+          />
+        </Suspense>
+      )}
+    </div>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<AppLayout />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<AppLayout />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
