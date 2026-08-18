@@ -1,5 +1,7 @@
-// Backend API URL
-const BACKEND_URL = 'http://localhost:8000/api/chat';
+// Backend API URL: Relative path in production (Vercel), absolute path for local development
+const BACKEND_URL = import.meta.env.PROD 
+  ? '/api/chat' 
+  : 'http://localhost:8000/api/chat';
 
 export const sendChatMessage = async (chatHistory, newMessage) => {
   try {
