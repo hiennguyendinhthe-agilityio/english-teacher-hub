@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { collection, getDocs, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
-import { LogOut, BookOpen, Trash2, Edit, Plus, LayoutDashboard, Sparkles, Loader2 } from 'lucide-react';
+import { LogOut, BookOpen, Trash2, Edit, Plus, LayoutDashboard, Sparkles, Loader2, Eye, X } from 'lucide-react';
 import AIImporter from '../components/AIImporter';
 import CourseEditor from '../components/CourseEditor';
+import InteractiveLesson from '../components/InteractiveLesson';
 
 export default function AdminDashboard() {
   const { currentUser, logout } = useAuth();
@@ -12,6 +13,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('courses'); // 'courses', 'importer', 'editor'
   const [editingCourse, setEditingCourse] = useState(null);
+  const [previewCourse, setPreviewCourse] = useState(null);
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -120,7 +122,19 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 p-6 md:p-10 overflow-y-auto">
-        {activeTab === 'courses' ? (
+        {previewCourse ? (
+          <div className="animate-in fade-in zoom-in-95 duration-300">
+            <div className="flex justify-end mb-4 max-w-5xl mx-auto">
+              <button 
+                onClick={() => setPreviewCourse(null)}
+                className="flex items-center gap-2 bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded-xl font-bold transition-colors"
+              >
+                <X size={18} /> Đóng Xem Trước
+              </button>
+            </div>
+            <InteractiveLesson lessonData={previewCourse} onBack={() => setPreviewCourse(null)} />
+          </div>
+        ) : activeTab === 'courses' ? (
           <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
             <div className="flex justify-between items-end mb-8">
               <div>
@@ -168,6 +182,12 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <button 
+                            onClick={() => setPreviewCourse(course)}
+                            className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors" title="Xem trước"
+                          >
+                            <Eye size={18} />
+                          </button>
+                          <button 
                             onClick={() => handleOpenEditor(course)}
                             className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Sửa"
                           >
@@ -209,7 +229,8 @@ export default function AdminDashboard() {
           <CourseEditor 
             initialData={editingCourse} 
             onSave={handleSaveCourse} 
-            onCancel={() => setActiveTab('courses')} 
+            onCancel={() => setActiveTab('courses')}
+            onSwitchToAI={() => setActiveTab('importer')}
           />
         ) : null}
       </div>
