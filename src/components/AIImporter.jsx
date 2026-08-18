@@ -163,7 +163,7 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
     saveLesson
   } = useAIStore();
 
-  const { text } = importerParams;
+  const { text, files = [] } = importerParams;
 
   const handleSaveLesson = async (lesson) => {
     if (onSaveLesson) {
@@ -195,12 +195,12 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
 
 
   const handleProcess = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() && (!files || files.length === 0)) return;
     setIsProcessing(true);
     setError('');
     
     try {
-      const lessonData = await generateLessonFromText(text);
+      const lessonData = await generateLessonFromText(text, { files });
       setGeneratedLesson(lessonData);
       setIsSuccess(true);
       soundFX.playSuccess();
@@ -213,7 +213,7 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
   };
 
   const handleLoadSample = (presetContent) => {
-    setImporterParams({ text: presetContent });
+    setImporterParams({ text: presetContent, files: [] });
     setInputMode('paste');
     setError('');
     soundFX.playFlip();
@@ -226,17 +226,36 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
     setIsReadingFile(true);
 
     try {
-      const cleanContent = await parseUploadedFile(file);
-      if (cleanContent) {
-        setImporterParams({ text: cleanContent });
-        setInputMode('paste');
+      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Data = reader.result.split(',')[1];
+          setImporterParams({ 
+            text: "Phân tích tài liệu/hình ảnh đính kèm và tạo bài học chi tiết theo cấu trúc JSON.", 
+            files: [{ mimeType: file.type, data: base64Data }] 
+          });
+          setInputMode('paste');
+          setIsReadingFile(false);
+          soundFX.playFlip();
+        };
+        reader.onerror = () => {
+          setError('Không thể đọc file');
+          setIsReadingFile(false);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const cleanContent = await parseUploadedFile(file);
+        if (cleanContent) {
+          setImporterParams({ text: cleanContent, files: [] });
+          setInputMode('paste');
+        }
+        setIsReadingFile(false);
+        soundFX.playFlip();
       }
-      soundFX.playFlip();
     } catch (err) {
-      setError(err.message || 'Failed to read document file');
-      soundFX.playError();
-    } finally {
+      setError(err.message || 'Lỗi khi đọc file');
       setIsReadingFile(false);
+      soundFX.playError();
     }
   };
 
@@ -268,13 +287,14 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
 
   const removeFile = () => {
     setUploadedFile(null);
+    setImporterParams({ text: '', files: [] });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
   const handleReset = () => {
-    setImporterParams({ text: '' });
+    setImporterParams({ text: '', files: [] });
     setUploadedFile(null);
     setIsSuccess(false);
     setGeneratedLesson(null);
@@ -408,7 +428,7 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".txt,.md,.docx,.pdf,.csv,.json"
+                    accept=".txt,.md,.docx,.pdf,.csv,.json,image/jpeg,image/png,image/webp"
                     onChange={handleFileChange}
                     className="hidden"
                   />

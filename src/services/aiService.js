@@ -27,13 +27,26 @@ export const setStoredApiKey = (key) => {
  */
 const GEMINI_MODEL = 'gemini-flash-latest';
 
-export const geminiRequest = async (prompt, { jsonMode = false, maxRetries = 3 } = {}) => {
+export const geminiRequest = async (prompt, { jsonMode = false, maxRetries = 3, files = [] } = {}) => {
   const apiKey = getStoredApiKey();
   if (!apiKey) throw new Error('No API key configured');
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  
+  const parts = [{ text: prompt }];
+  if (files && files.length > 0) {
+    files.forEach(f => {
+      parts.push({
+        inlineData: {
+          mimeType: f.mimeType,
+          data: f.data
+        }
+      });
+    });
+  }
+
   const body = JSON.stringify({
-    contents: [{ parts: [{ text: prompt }] }],
+    contents: [{ parts }],
     generationConfig: jsonMode
       ? { responseMimeType: 'application/json', temperature: 0.3 }
       : { temperature: 0.7 }
@@ -321,6 +334,7 @@ Return JSON array:
  * Generate Lesson Data From Raw Text (AI Importer)
  */
 export const generateLessonFromText = async (rawText, options = {}) => {
+  const { files = [] } = options;
   const apiKey = getStoredApiKey();
 
   if (!apiKey) {
@@ -328,11 +342,11 @@ export const generateLessonFromText = async (rawText, options = {}) => {
   }
 
   try {
-    const prompt = `You are an expert EFL/ESL curriculum specialist and textbook designer. Analyze the following raw lesson notes, curriculum excerpt, or teacher's syllabus, and convert it into a complete, rich, structured interactive lesson JSON.
+    const prompt = `You are an expert EFL/ESL curriculum specialist and textbook designer. Analyze the following raw lesson notes, prompt, OR uploaded image/PDF document, and convert it into a complete, rich, structured interactive lesson JSON.
 
-Raw Input Content:
+Raw Input Content / Prompt:
 """
-${rawText}
+${rawText || "Please extract the lesson content from the attached files."}
 """
 
 Requirements:
@@ -369,7 +383,7 @@ Requirements:
 
 Respond ONLY with valid JSON conforming to this schema.`;
 
-    const rawContent = await geminiRequest(prompt, { jsonMode: true });
+    const rawContent = await geminiRequest(prompt, { jsonMode: true, files });
     const parsed = JSON.parse(rawContent);
 
     // Normalize response

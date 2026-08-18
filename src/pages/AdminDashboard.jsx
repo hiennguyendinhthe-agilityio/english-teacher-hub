@@ -49,18 +49,12 @@ export default function AdminDashboard() {
   };
 
   const handleSaveLessonFromAI = async (lesson) => {
-    try {
-      // Create a unique ID if it doesn't have one
-      const lessonId = lesson.id || `unit-ai-${Date.now()}`;
-      const newLesson = { ...lesson, id: lessonId };
-      
-      await setDoc(doc(db, "courses", lessonId), newLesson);
-      alert("✅ Lưu bài học lên Firebase thành công!");
-      setActiveTab('courses');
-    } catch (error) {
-      console.error("Error saving lesson from AI:", error);
-      alert("Lỗi khi lưu bài học lên Cloud!");
-    }
+    // Phase 4: Route AI generated lesson to the Course Editor (Review before save)
+    const lessonId = lesson.id || `unit-ai-${Date.now()}`;
+    const newLesson = { ...lesson, id: lessonId };
+    
+    setEditingCourse(newLesson);
+    setActiveTab('editor');
   };
 
   const handleOpenEditor = (course = null) => {
