@@ -149,7 +149,7 @@ GRAMMAR: First Conditional with Business Modal Verbs
   }
 ];
 
-export default function AIImporter({ setActiveTab }) {
+export default function AIImporter({ setActiveTab, onSaveLesson }) {
   const { t, lang } = useLanguage();
   const samplePresets = lang === 'en' ? SAMPLE_PRESETS_EN : SAMPLE_PRESETS_VI;
 
@@ -164,6 +164,14 @@ export default function AIImporter({ setActiveTab }) {
   } = useAIStore();
 
   const { text } = importerParams;
+
+  const handleSaveLesson = async (lesson) => {
+    if (onSaveLesson) {
+      await onSaveLesson(lesson);
+    } else {
+      saveLesson(lesson);
+    }
+  };
 
   const isSaved = generatedLesson && savedLessons.some(l => l.id === generatedLesson.id);
 
@@ -513,8 +521,7 @@ export default function AIImporter({ setActiveTab }) {
                 <div className="w-full sm:w-auto flex flex-col sm:flex-row justify-end gap-2 shrink-0">
                   <Button
                     variant={isSaved ? "secondary" : "default"}
-                    size="sm"
-                    onClick={() => saveLesson(generatedLesson)}
+                    onClick={() => handleSaveLesson(generatedLesson)}
                     disabled={isSaved}
                     className={`w-full sm:w-auto rounded-xl font-semibold h-9 ${
                       isSaved ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-emerald-600 hover:bg-emerald-700 text-white"

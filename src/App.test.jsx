@@ -1,7 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 import App from './App';
+
+vi.mock('./context/AuthContext', () => ({
+  AuthProvider: ({ children }) => <>{children}</>,
+  useAuth: () => ({ currentUser: null, login: vi.fn(), logout: vi.fn() })
+}));
 
 describe('App Main Component with Lazy Loading & Suspense', () => {
   it('renders Dashboard by default with Student Hub branding', () => {

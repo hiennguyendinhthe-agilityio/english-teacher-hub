@@ -1,4 +1,9 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -14,7 +19,7 @@ const AIImporter = lazy(() => import('./components/AIImporter'));
 const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 
-export default function App() {
+function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -108,5 +113,23 @@ export default function App() {
         )}
       </div>
     </LanguageProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AppLayout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

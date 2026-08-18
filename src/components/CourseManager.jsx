@@ -6,24 +6,37 @@ import { useAIStore } from '../store/useAIStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { unit1Data } from '../data/unit1_data';
-import { unit2Data } from '../data/unit2_data';
-import { unit3Data } from '../data/unit3_data';
-import { unit4Data } from '../data/unit4_data';
-import { unit5Data } from '../data/unit5_data';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebase';
+import { Loader2 } from 'lucide-react';
 
 export default function CourseManager({ setActiveTab }) {
   const { t } = useLanguage();
   const [selectedLesson, setSelectedLesson] = useState(null);
   const { savedLessons, deleteSavedLesson } = useAIStore();
 
-  const units = [
-    unit1Data,
-    unit2Data,
-    unit3Data,
-    unit4Data,
-    unit5Data
-  ];
+  const [units, setUnits] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'courses'));
+        const coursesData = [];
+        querySnapshot.forEach((doc) => {
+          coursesData.push(doc.data());
+        });
+        // Sort courses by title (e.g. Unit 1, Unit 2...)
+        coursesData.sort((a, b) => a.title.localeCompare(b.title));
+        setUnits(coursesData);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   if (selectedLesson) {
     return <InteractiveLesson lessonData={selectedLesson} onBack={() => setSelectedLesson(null)} />;
@@ -47,7 +60,13 @@ export default function CourseManager({ setActiveTab }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 text-indigo-500">
+          <Loader2 className="h-12 w-12 animate-spin mb-4" />
+          <p className="text-lg font-medium">{t('fcLoading') || 'Loading courses...'}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {units.map((unit, idx) => (
           <Card 
             key={unit.id}
@@ -95,11 +114,12 @@ export default function CourseManager({ setActiveTab }) {
                 </div>
               )}
             </CardContent>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* AI Saved Lessons Section */}
+      {/* AI SAVED LESSONS SECTION */}
       {savedLessons && savedLessons.length > 0 && (
         <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <div className="flex items-center gap-3 mb-6 pb-2 border-b border-border/50">
