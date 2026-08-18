@@ -374,12 +374,18 @@ Requirements:
    - "title": Topic title (e.g. "Sounds /t/, /d/, and /ɪd/ for -ed endings")
    - "description": Clear pronunciation guide
    - "examples": [{ "word": "donated", "transcription": "/dəʊˈneɪtɪd/" }]
-6. "practice": Generate 4-6 high-quality multiple choice comprehension/practice questions:
-   - "id": number (1, 2, 3...)
-   - "question": "Clear question stem testing vocabulary or grammar from the lesson"
-   - "options": ["Option A", "Option B", "Option C", "Option D"]
-   - "correctAnswer": integer index (0, 1, 2, or 3) of the correct option
-   - "explanation": "Detailed pedagogical explanation of why this answer is correct"
+6. "practice": Extract and categorize ALL exercises from the raw text into a structured array of sections. Do NOT skip any reading passages, listening tasks, or writing prompts.
+   - "sectionName": Title (e.g. "A. LISTENING", "D. READING").
+   - "type": MUST be one of: "multiple_choice", "reading", "writing", "true_false", "fill_blank".
+   - "passage": (Optional) The full reading passage text if this is a reading section. Do not truncate!
+   - "questions": Array of questions for this section.
+      For "multiple_choice" or "true_false":
+        - "question": Question text
+        - "options": Array of choices (if applicable)
+        - "correctAnswer": Index of correct option (or 0 for True, 1 for False)
+        - "explanation": Explanation of the answer
+      For "reading", "writing", or "fill_blank":
+        - "question": The question or writing prompt (e.g., "Where is the house?", "The tall tree is behind my house. -> My house is ...")
 
 Respond ONLY with valid JSON conforming to this schema.`;
 

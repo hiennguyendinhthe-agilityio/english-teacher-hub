@@ -61,26 +61,52 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
     }
   };
 
-  const handleSelectAnswer = (qId, optionIdx) => {
-    if (submitted) return;
-    soundFX.playFlip();
-    setAnswers(prev => ({ ...prev, [qId]: optionIdx }));
+  // Normalize practice data (legacy vs sections)
+  let practiceSections = [];
+  let totalScoreable = 0;
+  if (lessonData.practice && lessonData.practice.length > 0) {
+    if (lessonData.practice[0].sectionName) {
+      practiceSections = lessonData.practice;
+    } else {
+      practiceSections = [{
+        sectionName: "PRACTICE",
+        type: "multiple_choice",
+        questions: lessonData.practice
+      }];
+    }
+  }
+
+  practiceSections.forEach((section, sIdx) => {
+    (section.questions || []).forEach((q, qIdx) => {
+      q._tempId = q.id || `q-${sIdx}-${qIdx}`;
+      if (q.correctAnswer !== undefined && q.correctAnswer !== null) {
+        totalScoreable++;
+      }
+    });
+  });
+
+  const handleSelectAnswer = (qId, value) => {
+    setAnswers(prev => ({ ...prev, [qId]: value }));
   };
 
   const handleSubmitQuiz = () => {
     setSubmitted(true);
     const score = calculateScore();
-    if (score >= Math.ceil(lessonData.practice.length * 0.7)) {
+    if (totalScoreable > 0 && score >= Math.ceil(totalScoreable * 0.7)) {
       soundFX.playVictory();
-    } else {
+    } else if (totalScoreable > 0) {
       soundFX.playError();
     }
   };
 
   const calculateScore = () => {
     let score = 0;
-    lessonData.practice.forEach(q => {
-      if (answers[q.id] === q.correctAnswer) score++;
+    practiceSections.forEach(section => {
+      (section.questions || []).forEach(q => {
+        if (q.correctAnswer !== undefined && q.correctAnswer !== null) {
+          if (answers[q._tempId] === q.correctAnswer) score++;
+        }
+      });
     });
     return score;
   };
@@ -344,57 +370,99 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
 
         {/* ── 4. PRACTICE TAB ── */}
         <TabsContent value="practice" className="min-h-[500px]">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-8 text-center text-indigo-600">
               {t('ilPracticeTitle')}
             </h2>
             
-            {(lessonData.practice || []).map((q, idx) => (
-              <Card key={q.id} className="mb-6 overflow-hidden border-indigo-100 dark:border-indigo-900/40 shadow-sm rounded-2xl">
-                <CardContent className="p-6 sm:p-8">
-                  <h3 className="text-lg font-medium mb-6 leading-relaxed">
-                    <span className="text-indigo-600 font-bold mr-2">{t('ilQuestion')} {idx + 1}:</span> 
-                    {cleanQuestionPrompt(q.question)}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {(q.options || []).map((opt, optIdx) => {
-                      const isSelected = answers[q.id] === optIdx;
-                      const isCorrect = optIdx === q.correctAnswer;
-                      
-                      let btnVariant = "outline";
-                      let customClasses = "justify-start h-auto py-3.5 px-4 font-normal text-left whitespace-normal h-full rounded-xl transition-all";
-
-                      if (submitted) {
-                        if (isCorrect) {
-                          customClasses = cn(customClasses, "bg-emerald-50 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-700 opacity-100 font-semibold");
-                        } else if (isSelected && !isCorrect) {
-                          customClasses = cn(customClasses, "bg-red-50 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-700 opacity-100");
-                        } else {
-                          customClasses = cn(customClasses, "opacity-50");
-                        }
-                      } else if (isSelected) {
-                        customClasses = cn(customClasses, "bg-indigo-50 border-indigo-500 text-indigo-700 font-semibold shadow-sm");
-                      }
-
-                      return (
-                        <Button 
-                          key={optIdx}
-                          variant={btnVariant}
-                          className={customClasses}
-                          onClick={() => handleSelectAnswer(q.id, optIdx)}
-                          disabled={submitted && !isCorrect && !isSelected}
-                        >
-                          <div className="flex w-full justify-between items-center gap-2">
-                            <span>{opt}</span>
-                            {submitted && isCorrect && <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />}
-                            {submitted && isSelected && !isCorrect && <XCircle size={18} className="text-red-500 flex-shrink-0" />}
-                          </div>
-                        </Button>
-                      );
-                    })}
+            {practiceSections.map((section, sIdx) => (
+              <div key={sIdx} className="mb-10">
+                <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 font-bold px-4 py-2 rounded-t-xl border-b-2 border-indigo-200 dark:border-indigo-800">
+                  {section.sectionName}
+                </div>
+                
+                {section.passage && (
+                  <div className="bg-white dark:bg-zinc-900 p-6 border-x border-indigo-100 dark:border-indigo-900/30 text-foreground leading-relaxed text-lg whitespace-pre-wrap">
+                    {section.passage}
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                <div className="bg-slate-50 dark:bg-zinc-950 p-6 rounded-b-xl border border-t-0 border-indigo-100 dark:border-indigo-900/30 space-y-6">
+                  {(section.questions || []).map((q, qIdx) => (
+                    <Card key={q._tempId} className="overflow-hidden border-indigo-100 dark:border-indigo-900/40 shadow-sm rounded-2xl">
+                      <CardContent className="p-6">
+                        <h3 className="text-lg font-medium mb-4 leading-relaxed">
+                          <span className="text-indigo-600 font-bold mr-2">{qIdx + 1}.</span> 
+                          {cleanQuestionPrompt(q.question)}
+                        </h3>
+                        
+                        {(section.type === 'multiple_choice' || section.type === 'true_false') ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {(q.options || []).map((opt, optIdx) => {
+                              const isSelected = answers[q._tempId] === optIdx;
+                              const isCorrect = optIdx === q.correctAnswer;
+                              
+                              let btnVariant = "outline";
+                              let customClasses = "justify-start h-auto py-3.5 px-4 font-normal text-left whitespace-normal h-full rounded-xl transition-all";
+
+                              if (submitted) {
+                                if (isCorrect) {
+                                  customClasses = cn(customClasses, "bg-emerald-50 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-700 opacity-100 font-semibold");
+                                } else if (isSelected && !isCorrect) {
+                                  customClasses = cn(customClasses, "bg-red-50 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-700 opacity-100");
+                                } else {
+                                  customClasses = cn(customClasses, "opacity-50");
+                                }
+                              } else if (isSelected) {
+                                customClasses = cn(customClasses, "bg-indigo-50 border-indigo-500 text-indigo-700 font-semibold shadow-sm");
+                              }
+
+                              return (
+                                <Button 
+                                  key={optIdx}
+                                  variant={btnVariant}
+                                  className={customClasses}
+                                  onClick={() => handleSelectAnswer(q._tempId, optIdx)}
+                                  disabled={submitted && !isCorrect && !isSelected}
+                                >
+                                  <div className="flex w-full justify-between items-center gap-2">
+                                    <span>{opt}</span>
+                                    {submitted && isCorrect && <CheckCircle2 size={18} className="text-emerald-500 flex-shrink-0" />}
+                                    {submitted && isSelected && !isCorrect && <XCircle size={18} className="text-red-500 flex-shrink-0" />}
+                                  </div>
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div>
+                            <textarea 
+                              className="w-full min-h-[100px] p-4 rounded-xl border border-input bg-background focus:ring-2 focus:ring-indigo-500 outline-none resize-y"
+                              placeholder="Type your answer here..."
+                              value={answers[q._tempId] || ''}
+                              onChange={(e) => handleSelectAnswer(q._tempId, e.target.value)}
+                              disabled={submitted}
+                            />
+                            {submitted && q.explanation && (
+                              <div className="mt-4 p-4 bg-emerald-50 text-emerald-800 rounded-xl text-sm border border-emerald-200">
+                                <span className="font-bold mr-2">Suggested Answer/Explanation:</span>
+                                {q.explanation}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {submitted && (section.type === 'multiple_choice' || section.type === 'true_false') && q.explanation && (
+                          <div className="mt-4 p-4 bg-slate-100 dark:bg-zinc-800 rounded-xl text-sm italic border-l-4 border-indigo-400">
+                            <span className="font-bold not-italic mr-1">Explanation:</span>
+                            {q.explanation}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             ))}
 
             {!submitted ? (
@@ -402,7 +470,6 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
                 onClick={handleSubmitQuiz}
                 size="lg"
                 className="w-full mt-4 h-14 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/25"
-                disabled={Object.keys(answers).length !== (lessonData.practice?.length || 0)}
               >
                 Submit Answers
               </Button>
@@ -410,7 +477,7 @@ export default function InteractiveLesson({ lessonData: rawLessonData, onBack })
               <div className="mt-10 p-10 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-3xl text-center shadow-xl shadow-indigo-500/20 animate-in zoom-in-95 duration-500">
                 <h3 className="text-2xl font-medium mb-3 opacity-90">Your Score</h3>
                 <div className="text-6xl font-black mb-8 tracking-tight drop-shadow-md">
-                  {calculateScore()} <span className="text-3xl text-white/70">/ {lessonData.practice?.length || 0}</span>
+                  {calculateScore()} <span className="text-3xl text-white/70">/ {totalScoreable}</span>
                 </div>
                 <Button 
                   onClick={() => { setSubmitted(false); setAnswers({}); }}

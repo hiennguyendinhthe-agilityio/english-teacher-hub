@@ -11,7 +11,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
   const [courseId, setCourseId] = useState(initialData?.id || '');
   const [grammarStr, setGrammarStr] = useState(JSON.stringify(initialData?.grammar || [], null, 2));
   const [phoneticsStr, setPhoneticsStr] = useState(JSON.stringify(initialData?.phonetics || [], null, 2));
-  const [practice, setPractice] = useState(initialData?.practice || []);
+  const [practiceStr, setPracticeStr] = useState(JSON.stringify(initialData?.practice || [], null, 2));
   
   // Vocabulary State
   const [vocabulary, setVocabulary] = useState(initialData?.vocabulary || [
@@ -33,24 +33,6 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
     setVocabulary(newVocab);
   };
 
-  // Practice State Handlers
-  const handleAddPractice = () => {
-    setPractice([...practice, { id: practice.length + 1, question: '', options: ['', '', '', ''], correctAnswer: 0, explanation: '' }]);
-  };
-  const handleRemovePractice = (index) => {
-    setPractice(practice.filter((_, idx) => idx !== index));
-  };
-  const handlePracticeChange = (index, field, value) => {
-    const newPractice = [...practice];
-    newPractice[index][field] = value;
-    setPractice(newPractice);
-  };
-  const handleOptionChange = (qIndex, optIndex, value) => {
-    const newPractice = [...practice];
-    newPractice[qIndex].options[optIndex] = value;
-    setPractice(newPractice);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim() || !courseId.trim()) {
@@ -60,11 +42,13 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
 
     let parsedGrammar = [];
     let parsedPhonetics = [];
+    let parsedPractice = [];
     try {
       parsedGrammar = JSON.parse(grammarStr);
       parsedPhonetics = JSON.parse(phoneticsStr);
+      parsedPractice = JSON.parse(practiceStr);
     } catch (err) {
-      alert("Lỗi cú pháp JSON ở phần Ngữ Pháp hoặc Phát Âm! Vui lòng kiểm tra lại.");
+      alert("Lỗi cú pháp JSON ở phần Ngữ Pháp, Phát Âm hoặc Bài Tập! Vui lòng kiểm tra lại.");
       return;
     }
 
@@ -74,7 +58,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
       vocabulary: vocabulary.filter(v => v.word.trim() !== ''),
       grammar: parsedGrammar,
       phonetics: parsedPhonetics,
-      practice: practice.filter(p => p.question.trim() !== '')
+      practice: parsedPractice
     };
 
     onSave(courseData);
@@ -219,76 +203,18 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
           </CardContent>
         </Card>
 
-        {/* Practice Editor */}
+        {/* Practice (Advanced JSON) */}
         <Card className="border-border/50 shadow-sm overflow-hidden bg-white dark:bg-zinc-900">
-          <div className="bg-slate-50 dark:bg-zinc-950/50 px-6 py-4 border-b border-border/50 flex justify-between items-center">
-            <h2 className="text-lg font-bold">3. Danh sách Bài Tập (Practice)</h2>
-            <Button type="button" onClick={handleAddPractice} size="sm" className="h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1">
-              <Plus size={16} /> Thêm câu hỏi
-            </Button>
+          <div className="bg-slate-50 dark:bg-zinc-950/50 px-6 py-4 border-b border-border/50">
+            <h2 className="text-lg font-bold">3. Bài Tập 4 Kỹ năng (Advanced JSON)</h2>
+            <p className="text-xs text-muted-foreground mt-1">Hỗ trợ các dạng bài Đọc hiểu, Viết tự luận, Trắc nghiệm. Nên dùng AI để sinh tự động.</p>
           </div>
           <CardContent className="p-6 space-y-4">
-            {practice.length === 0 && (
-              <p className="text-center text-muted-foreground py-4 text-sm">Chưa có bài tập nào. Hãy nhấn "Thêm câu hỏi" hoặc dùng AI để tạo tự động.</p>
-            )}
-            {practice.map((q, qIndex) => (
-              <div key={qIndex} className="p-4 rounded-xl border border-border/50 bg-slate-50 dark:bg-zinc-950/30 relative group">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => handleRemovePractice(qIndex)}
-                  className="absolute top-2 right-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Trash2 size={18} />
-                </Button>
-                <div className="space-y-4 pr-8">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-foreground">Câu hỏi {qIndex + 1}</label>
-                    <Input 
-                      placeholder="Nhập nội dung câu hỏi..." 
-                      value={q.question} 
-                      onChange={(e) => handlePracticeChange(qIndex, 'question', e.target.value)} 
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {q.options.map((opt, optIndex) => (
-                      <div key={optIndex} className="flex items-center gap-2">
-                        <span className="text-sm font-bold w-6">{String.fromCharCode(65 + optIndex)}.</span>
-                        <Input 
-                          placeholder={`Đáp án ${String.fromCharCode(65 + optIndex)}`} 
-                          value={opt} 
-                          onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)} 
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-semibold text-foreground">Đáp án đúng</label>
-                      <select 
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        value={q.correctAnswer}
-                        onChange={(e) => handlePracticeChange(qIndex, 'correctAnswer', parseInt(e.target.value))}
-                      >
-                        <option value={0}>A</option>
-                        <option value={1}>B</option>
-                        <option value={2}>C</option>
-                        <option value={3}>D</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-semibold text-foreground">Giải thích (tùy chọn)</label>
-                      <Input 
-                        placeholder="Vì sao chọn đáp án này?" 
-                        value={q.explanation || ''} 
-                        onChange={(e) => handlePracticeChange(qIndex, 'explanation', e.target.value)} 
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <Textarea 
+              value={practiceStr}
+              onChange={(e) => setPracticeStr(e.target.value)}
+              className="font-mono text-xs min-h-[300px] bg-slate-900 text-yellow-400 p-4 rounded-xl"
+            />
           </CardContent>
         </Card>
 
