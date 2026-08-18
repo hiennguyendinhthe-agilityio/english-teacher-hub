@@ -2,28 +2,23 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
-import google.generativeai as genai
+from typing import List
+import httpx
 from dotenv import load_dotenv
 
-# Nạp biến môi trường từ file .env
 load_dotenv()
 
 app = FastAPI(title="Ms Van's English Class AI Backend")
 
-# Cấu hình CORS để cho phép React frontend kết nối
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Chỉ cho phép web của chúng ta
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Cấu hình Gemini API Key
 api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
 
 SYSTEM_INSTRUCTION = """Bạn là Trợ lý AI ảo của "Ms Van's English Class" - một nền tảng E-Learning và công cụ hỗ trợ giảng dạy tiếng Anh hiện đại.
 Nhiệm vụ của bạn là:
@@ -59,28 +54,52 @@ async def chat_with_ai(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Chưa cấu hình GEMINI_API_KEY trên Server")
         
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            system_instruction=SYSTEM_INSTRUCTION
-        )
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
         
-        # Chuyển đổi định dạng lịch sử cho phù hợp với Python SDK của Google
-        formatted_history = []
+        # Chuyển đổi lịch sử
+        contents = []
         for msg in request.history:
-            # Lọc bỏ câu chào đầu tiên của AI nếu bị dính vào
             role = "model" if msg.role == "ai" else "user"
-            formatted_history.append({"role": role, "parts": msg.text})
+            contents.append({"role": role, "parts": [{"text": msg.text}]})
             
-        # Lọc bỏ câu chào đầu tiên nếu nó là model (Gemini bắt buộc phải bắt đầu bằng user)
-        if formatted_history and formatted_history[0]["role"] == "model":
-            formatted_history.pop(0)
+        # Lọc bỏ câu chào đầu tiên của AI
+        if contents and contents[0]["role"] == "model":
+            contents.pop(0)
+            
+        # Thêm câu hỏi mới
+        contents.append({"role": "user", "parts": [{"text": request.message}]})
+        
+        payload = {
+            "contents": contents,
+            "systemInstruction": {
+                "role": "user",
+                "parts": [{"text": SYSTEM_INSTRUCTION}]
+            },
+            "generationConfig": {
+                "maxOutputTokens": 1000,
+                "temperature": 0.7,
+            }
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, timeout=30.0)
+            
+            if response.status_code != 200:
+                print(f"Gemini API Error: {response.text}")
+                data = response.json()
+                if data.get("error", {}).get("code") == 503:
+                    raise HTTPException(status_code=503, detail="Máy chủ Google Gemini đang quá tải, vui lòng thử lại sau vài giây nhé!")
+                raise HTTPException(status_code=500, detail="Lỗi từ Google Gemini API")
+                
+            data = response.json()
+            if "candidates" in data and len(data["candidates"]) > 0:
+                reply_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                return {"reply": reply_text}
+                
+            raise HTTPException(status_code=500, detail="AI trả về dữ liệu không hợp lệ")
 
-        chat_session = model.start_chat(history=formatted_history)
-        
-        # Gửi câu hỏi mới lên
-        response = chat_session.send_message(request.message)
-        
-        return {"reply": response.text}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Lỗi khi gọi AI: {str(e)}")
         raise HTTPException(status_code=500, detail="Xin lỗi, tôi đang gặp trục trặc kỹ thuật. Vui lòng thử lại sau nhé!")
