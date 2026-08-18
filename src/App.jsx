@@ -18,6 +18,7 @@ const EssayGrader = lazy(() => import('./components/EssayGrader'));
 const AIImporter = lazy(() => import('./components/AIImporter'));
 const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
+import AIChatBot from './components/AIChatBot';
 
 function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -110,6 +111,9 @@ function AppLayout() {
           />
         </Suspense>
       )}
+
+      {/* Global AI Chat Assistant */}
+      <AIChatBot />
     </div>
   );
 }
