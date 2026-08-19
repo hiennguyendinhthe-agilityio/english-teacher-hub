@@ -303,7 +303,25 @@ export const translations = {
     btnCopied: "Đã Chép!",
     btnPrint: "In Bài",
     btnSave: "Lưu Cài Đặt",
-    btnCancel: "Hủy Bỏ"
+    btnCancel: "Hủy Bỏ",
+
+    // ── AI Chatbot ──
+    chatBotTitle: "Trợ Lý AI Ms Van",
+    chatBotSubtitle: "Học tập & Soạn bài thông minh",
+    chatBotOnlineBadge: "Trực tuyến",
+    chatBotGreeting: "Xin chào! Mình là Trợ lý AI của Ms Van's English Class. Mình có thể giúp gì cho việc học hoặc giảng dạy tiếng Anh của bạn hôm nay?",
+    chatBotInputPlaceholder: "Hỏi về từ vựng, ngữ pháp hoặc tính năng web...",
+    chatBotThinking: "Trợ lý đang suy nghĩ...",
+    chatBotSuggested: "Gợi ý nhanh:",
+    chatBotResetTooltip: "Làm mới đoạn chat",
+    chatBotCloseTooltip: "Đóng cửa sổ chat",
+    chatBotChipFlashcards: "🎴 Học từ vựng",
+    chatBotChipAIImporter: "📑 Tạo bài học AI",
+    chatBotChipEssay: "✍️ Chấm bài luận",
+    chatBotChipWorksheet: "📄 In đề thi PDF",
+    chatBotChipUnit1: "🏫 Tóm tắt Unit 1",
+    chatBotChipGrammar: "💡 Thì hiện tại đơn",
+    chatBotFollowUpTitle: "Bạn có muốn tìm hiểu thêm:",
   },
 
   en: {
@@ -600,7 +618,25 @@ export const translations = {
     btnCopied: "Copied!",
     btnPrint: "Print",
     btnSave: "Save Settings",
-    btnCancel: "Cancel"
+    btnCancel: "Cancel",
+
+    // ── AI Chatbot ──
+    chatBotTitle: "Ms Van's AI Assistant",
+    chatBotSubtitle: "Smart E-Learning Guide",
+    chatBotOnlineBadge: "Online",
+    chatBotGreeting: "Hello! I am Ms Van's AI Assistant. How can I assist with your English studies or teaching toolkit today?",
+    chatBotInputPlaceholder: "Ask me anything about English or website tools...",
+    chatBotThinking: "AI is thinking...",
+    chatBotSuggested: "Suggested:",
+    chatBotResetTooltip: "Reset chat",
+    chatBotCloseTooltip: "Close chat",
+    chatBotChipFlashcards: "🎴 Flashcards Guide",
+    chatBotChipAIImporter: "📑 AI Importer",
+    chatBotChipEssay: "✍️ Essay Grader",
+    chatBotChipWorksheet: "📄 PDF Worksheet",
+    chatBotChipUnit1: "🏫 Unit 1 Summary",
+    chatBotChipGrammar: "💡 Present Simple",
+    chatBotFollowUpTitle: "Suggested next steps:",
   }
 };
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateSmartResponse, normalizeText, isEnglishQuery } from './smartChatEngine';
+import { generateSmartResponse, normalizeText, isEnglishQuery, getSmartFollowUpSuggestions } from './smartChatEngine';
 
 describe('SmartChatEngine - Comprehensive 35+ Test Cases', () => {
 
@@ -236,6 +236,31 @@ describe('SmartChatEngine - Comprehensive 35+ Test Cases', () => {
     it('TC35: Correctly detects English query markers', () => {
       expect(isEnglishQuery('How to use this web?')).toBe(true);
       expect(isEnglishQuery('cách sử dụng trang web')).toBe(false);
+    });
+
+    it('TC36: Generates interactive follow-up suggestions for Flashcards', () => {
+      const suggestionsVi = getSmartFollowUpSuggestions('học từ vựng flashcard', 'vi');
+      expect(suggestionsVi.length).toBeGreaterThan(0);
+      expect(suggestionsVi[0]).toContain('Unit 1');
+
+      const suggestionsEn = getSmartFollowUpSuggestions('flashcard vocabulary deck', 'en');
+      expect(suggestionsEn.length).toBeGreaterThan(0);
+      expect(suggestionsEn[0]).toContain('Unit 1');
+    });
+
+    it('TC37: Generates interactive follow-up suggestions for AI Importer', () => {
+      const suggestions = getSmartFollowUpSuggestions('soạn giáo án bằng ai importer', 'vi');
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions.some(s => s.includes('PDF') || s.includes('Worksheet'))).toBe(true);
+    });
+
+    it('TC38: Strictly respects preferred English language context even with brief query', () => {
+      const resEn = generateSmartResponse('unit 1', 'en');
+      expect(resEn).toContain('Unit 1: MY NEW SCHOOL');
+      expect(resEn).toContain('Key Vocabulary');
+
+      const resVi = generateSmartResponse('unit 1', 'vi');
+      expect(resVi).toContain('Ngôi Trường Mới Của Tôi');
     });
   });
 });

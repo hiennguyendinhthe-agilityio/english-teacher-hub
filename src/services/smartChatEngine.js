@@ -1,6 +1,6 @@
 /**
  * Ms Van's English Class - Smart NLP & Intent Engine (Frontend & Unit Testable)
- * 0$ Cost, 100% Uptime, Zero Rate Limit, Instant Response Time
+ * 0$ Cost, 100% Uptime, Zero Rate Limit, Instant Response Time, Bilingual Aware
  */
 
 export function normalizeText(text) {
@@ -8,7 +8,15 @@ export function normalizeText(text) {
   return text.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-export function isEnglishQuery(text) {
+export function isEnglishQuery(text, preferredLang = null) {
+  if (preferredLang === 'en') return true;
+  if (preferredLang === 'vi') {
+    // Nếu preferred là vi, chỉ chuyển sang tiếng Anh nếu câu hỏi rõ ràng bằng tiếng Anh
+    const enExplicitStarts = ['what is', 'how to', 'how can', 'why is', 'who is', 'tell me', 'can you', 'explain the'];
+    if (enExplicitStarts.some(s => text.toLowerCase().startsWith(s))) return true;
+    return false;
+  }
+  
   const enMarkers = [
     'what', 'how', 'why', 'when', 'where', 'who', 'which', 'can you',
     'tell me', 'explain', 'help', 'hello', 'hi', 'good morning', 'is', 'are'
@@ -17,9 +25,49 @@ export function isEnglishQuery(text) {
   return enMarkers.some(marker => words.includes(marker) || text.toLowerCase().startsWith(marker));
 }
 
-export function generateSmartResponse(userMessage) {
+export function getSmartFollowUpSuggestions(userMessage, preferredLang = null) {
   const msg = normalizeText(userMessage);
-  const isEn = isEnglishQuery(msg);
+  const isEn = isEnglishQuery(msg, preferredLang);
+
+  if (/\b(flashcard|từ vựng|lật thẻ|vocabulary)\b/i.test(msg)) {
+    return isEn
+      ? ['🎴 Practice Unit 1 Cards', '💡 Present Simple Tense', '📑 AI Lesson Importer']
+      : ['🎴 Thẻ từ vựng Unit 1', '💡 Ngữ pháp: Hiện tại đơn', '📑 Soạn giáo án với AI'];
+  }
+  if (/\b(tạo bài học|soạn giáo án|ai importer|importer|upload|docx|txt|pdf|lesson planner)\b/i.test(msg)) {
+    return isEn
+      ? ['📄 Printable PDF Worksheets', '✍️ Essay Grading Tool', '📺 Classroom TV Mode']
+      : ['📄 In đề thi PDF Worksheet', '✍️ Chấm bài luận AI', '📺 Chế độ trình chiếu TV'];
+  }
+  if (/\b(in bài tập|worksheet|phiếu bài tập|in pdf|print)\b/i.test(msg)) {
+    return isEn
+      ? ['✍️ Essay Grader Guide', '🎴 Flashcard Builder', '🏫 Unit 2: My House']
+      : ['✍️ Hướng dẫn Essay Grader', '🎴 Học từ vựng Flashcard', '🏫 Tóm tắt Unit 2: My House'];
+  }
+  if (/\b(chấm bài|chấm điểm|bài luận|essay|writing|grader)\b/i.test(msg)) {
+    return isEn
+      ? ['🎴 Vocabulary Flashcards', '📑 AI Lesson Importer', '🏫 Unit 1: My New School']
+      : ['🎴 Luyện từ vựng Flashcard', '📑 Soạn giáo án với AI', '🏫 Unit 1: My New School'];
+  }
+  if (/\b(unit 1|unit 2|unit 3|unit 4|unit 5|bài học|khoá học)\b/i.test(msg)) {
+    return isEn
+      ? ['💡 Grammar for this Unit', '🎴 Vocabulary Deck', '📄 Export Unit Worksheet']
+      : ['💡 Ngữ pháp của Unit này', '🎴 Luyện Flashcard từ vựng', '📄 In phiếu bài tập Unit này'];
+  }
+  if (/\b(hiện tại đơn|present simple|a và an|so sánh hơn|grammar|ngữ pháp)\b/i.test(msg)) {
+    return isEn
+      ? ['🏫 Unit 1 Summary', '🎴 Flashcards for Grade 6', '✍️ Writing Practice']
+      : ['🏫 Tóm tắt Unit 1', '🎴 Flashcard từ vựng lớp 6', '✍️ Luyện viết đoạn văn'];
+  }
+
+  return isEn
+    ? ['🎴 Flashcards Guide', '📑 AI Importer', '🏫 Grade 6 Units', '💡 Grammar FAQ']
+    : ['🎴 Học từ vựng Flashcard', '📑 Tạo bài học AI', '🏫 5 Unit Tiếng Anh 6', '💡 Ngữ pháp thường gặp'];
+}
+
+export function generateSmartResponse(userMessage, preferredLang = null) {
+  const msg = normalizeText(userMessage);
+  const isEn = isEnglishQuery(msg, preferredLang);
 
   if (!msg || /^[\s?!.,;]+$/.test(msg)) {
     return isEn 
@@ -185,6 +233,16 @@ export function generateSmartResponse(userMessage) {
 
   // 3. GRADE 6 UNITS (1 - 5)
   if (/\b(unit 1|my new school|trường mới)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "🏫 **Unit 1: MY NEW SCHOOL**\n\n" +
+        "- **Key Vocabulary:** School items (*calculator, compass, rubber, textbook*), School subjects (*maths, physics, history*), Verbs (*have, do, play, study*).\n" +
+        "- **Grammar:**\n" +
+        "  1. **The Present Simple Tense:** Expressing habits and general truths (`S + V(s/es)`).\n" +
+        "  2. **Adverbs of Frequency:** *always, usually, often, sometimes, rarely, never*.\n" +
+        "- **Pronunciation:** Contrasting the sounds **/ɑː/** (*smart, fast*) and **/ʌ/** (*subject, study*)."
+      );
+    }
     return (
       "🏫 **Unit 1: MY NEW SCHOOL (Ngôi Trường Mới Của Tôi)**\n\n" +
       "- **Từ vựng chính:** School things (*calculator, compass, rubber, textbook*), School subjects (*maths, physics, history*), Verbs (*have, do, play, study*).\n" +
@@ -196,6 +254,16 @@ export function generateSmartResponse(userMessage) {
   }
 
   if (/\b(unit 2|my house|ngôi nhà)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "🏡 **Unit 2: MY HOUSE**\n\n" +
+        "- **Key Vocabulary:** House types (*town house, country house, villa, stilt house*), Rooms (*living room, bedroom, kitchen, attic*), Furniture (*chest of drawers, wardrobe, dishwasher*).\n" +
+        "- **Grammar:**\n" +
+        "  1. **Prepositions of Place:** *in, on, behind, in front of, next to, between, under*.\n" +
+        "  2. **Descriptive structures:** `There is + Singular noun` / `There are + Plural nouns`.\n" +
+        "- **Pronunciation:** Plural endings: **/s/**, **/z/**, **/ɪz/**."
+      );
+    }
     return (
       "🏡 **Unit 2: MY HOUSE (Ngôi Nhà Của Tôi)**\n\n" +
       "- **Từ vựng chính:** Các loại nhà (*town house, country house, villa, stilt house*), Các phòng (*living room, bedroom, kitchen, attic*), Đồ đạc (*chest of drawers, wardrobe, dishwasher*).\n" +
@@ -207,6 +275,16 @@ export function generateSmartResponse(userMessage) {
   }
 
   if (/\b(unit 3|my friends|bạn bè|tính cách)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "👫 **Unit 3: MY FRIENDS**\n\n" +
+        "- **Key Vocabulary:** Appearance (*chubby cheeks, straight nose, blond hair*), Personality (*active, clever, confident, kind, funny, patient, reliable*).\n" +
+        "- **Grammar:**\n" +
+        "  1. **The Present Continuous Tense:** Ongoing actions (`S + is/am/are + V-ing`).\n" +
+        "  2. **Present Continuous for future plans:** Definite arrangements.\n" +
+        "- **Pronunciation:** Contrasting the consonants **/b/** (*book, boy*) and **/p/** (*picture, pen*)."
+      );
+    }
     return (
       "👫 **Unit 3: MY FRIENDS (Bạn Bè Của Tôi)**\n\n" +
       "- **Từ vựng chính:** Ngoại hình (*chubby cheeks, straight nose, blond hair*), Tính cách (*active, clever, confident, kind, funny, patient, reliable*).\n" +
@@ -218,6 +296,15 @@ export function generateSmartResponse(userMessage) {
   }
 
   if (/\b(unit 4|my neighbourhood|khu phố|hàng xóm)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "🏘️ **Unit 4: MY NEIGHBOURHOOD**\n\n" +
+        "- **Key Vocabulary:** Local places (*square, art gallery, cathedral, railway station, pagoda, grocery store*), Adjectives (*peaceful, noisy, historic, modern, crowded*).\n" +
+        "- **Grammar:**\n" +
+        "  - **Comparative Adjectives for short adjectives:** `S + be + adj-er + than + O` (e.g. *Hanoi is larger than Da Nang*).\n" +
+        "- **Pronunciation:** Sounds **/iː/** (*peaceful, clean*) and **/ɪ/** (*historic, busy*)."
+      );
+    }
     return (
       "🏘️ **Unit 4: MY NEIGHBOURHOOD (Khu Phố Của Tôi)**\n\n" +
       "- **Từ vựng chính:** Địa điểm xung quanh (*square, art gallery, cathedral, railway station, pagoda, grocery store*), Tính từ miêu tả (*peaceful, noisy, historic, modern, crowded*).\n" +
@@ -229,6 +316,16 @@ export function generateSmartResponse(userMessage) {
   }
 
   if (/\b(unit 5|natural wonders|kỳ quan|vịnh hạ long)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "⛰️ **Unit 5: NATURAL WONDERS OF VIETNAM**\n\n" +
+        "- **Key Vocabulary:** Natural landscapes (*waterfall, desert, cave, island, mountain, valley*), Travel gear (*suncream, plaster, sleeping bag, waterproof coat*).\n" +
+        "- **Grammar:**\n" +
+        "  1. **Countable and Uncountable Nouns.**\n" +
+        "  2. **Modal Verbs Must & Mustn't:** `Must` (obligation) vs `Mustn't` (prohibition).\n" +
+        "- **Pronunciation:** Consonants **/t/** (*tent, boot*) and **/d/** (*desert, island*)."
+      );
+    }
     return (
       "⛰️ **Unit 5: NATURAL WONDERS OF VIETNAM (Kỳ Quan Thiên Nhiên Việt Nam)**\n\n" +
       "- **Từ vựng chính:** Cảnh quan thiên nhiên (*waterfall, desert, cave, island, mountain, valley*), Đồ dùng du lịch (*suncream, plaster, sleeping bag, waterproof coat*).\n" +
@@ -243,6 +340,17 @@ export function generateSmartResponse(userMessage) {
 
   // 4. GRAMMAR FAQ
   if (/\b(hiện tại đơn|present simple|cách dùng thì hiện tại đơn)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "💡 **The Present Simple Tense Guide:**\n\n" +
+        "- **Affirmative:** `S + V(s/es) + O`\n" +
+        "  - *I/You/We/They + V (bare)* (e.g. *I play football*).\n" +
+        "  - *He/She/It + V-s/es* (e.g. *She studies English*).\n" +
+        "- **Negative:** `S + do not / does not + V (bare)`.\n" +
+        "- **Interrogative:** `Do / Does + S + V (bare)?`\n" +
+        "- **Signal words:** *always, usually, often, sometimes, every day, on Mondays*."
+      );
+    }
     return (
       "💡 **Cẩm Nang Thì Hiện Tại Đơn (Present Simple):**\n\n" +
       "- **Công thức khẳng định:** `S + V(s/es) + O`\n" +
@@ -255,6 +363,15 @@ export function generateSmartResponse(userMessage) {
   }
 
   if (/\b(phân biệt a và an|khi nào dùng an|mạo từ a an|a an the)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "💡 **Rules for Articles 'A' and 'AN':**\n\n" +
+        "- Use **AN** before words beginning with a **vowel sound** (vowels: **u, e, o, a, i**):\n" +
+        "  - *an apple, an eraser, an island, an hour (silent h)*.\n" +
+        "- Use **A** before words beginning with a **consonant sound**:\n" +
+        "  - *a book, a ruler, a school, a uniform (pronounced with /juː/ consonant sound)*."
+      );
+    }
     return (
       "💡 **Quy Tắc Dùng Mạo Từ 'A' và 'AN':**\n\n" +
       "- Dùng **AN** trước các từ bắt đầu bằng một **nguyên âm phát âm** (mẹo nhớ: **u - e - o - a - i**):\n" +
@@ -265,6 +382,17 @@ export function generateSmartResponse(userMessage) {
   }
 
   if (/\b(so sánh hơn|tính từ ngắn|công thức so sánh)\b/i.test(msg)) {
+    if (isEn) {
+      return (
+        "💡 **Comparative Adjectives Formula (Short Adjectives):**\n\n" +
+        "👉 `S1 + be + Adj-er + than + S2`\n\n" +
+        "- **Example:** *My house is bigger than your house.*\n" +
+        "- **Spelling rules:**\n" +
+        "  - Ending in *e*: add *r* (*nice -> nicer*).\n" +
+        "  - Ending in *y*: change to *ier* (*noisy -> noisier*).\n" +
+        "  - Consonant - Vowel - Consonant: double final letter (*big -> bigger*)."
+      );
+    }
     return (
       "💡 **Công Thức So Sánh Hơn Tính Từ Ngắn (Comparative):**\n\n" +
       "👉 `S1 + be + Adj-er + than + S2`\n\n" +

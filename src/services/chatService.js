@@ -5,7 +5,7 @@ const BACKEND_URL = import.meta.env.PROD
   ? '/api/chat' 
   : 'http://localhost:8000/api/chat';
 
-export const sendChatMessage = async (chatHistory, newMessage) => {
+export const sendChatMessage = async (chatHistory, newMessage, language = 'vi') => {
   try {
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
@@ -14,7 +14,8 @@ export const sendChatMessage = async (chatHistory, newMessage) => {
       },
       body: JSON.stringify({
         history: chatHistory,
-        message: newMessage
+        message: newMessage,
+        language: language
       })
     });
 
@@ -25,13 +26,13 @@ export const sendChatMessage = async (chatHistory, newMessage) => {
       }
     }
     
-    // Nếu backend phản hồi không 200, kích hoạt bộ não Smart Engine tại chỗ
+    // Nếu backend phản hồi không 200, kích hoạt bộ não Smart Engine tại chỗ với ngôn ngữ hiện tại
     console.warn('Backend returned non-200, activating client-side Smart NLP Engine');
-    return generateSmartResponse(newMessage);
+    return generateSmartResponse(newMessage, language);
 
   } catch (error) {
     console.warn('Backend fetch failed, activating resilient Smart NLP Engine:', error);
     // Tự động trả lời thông minh bằng client-side engine khi mất mạng hoặc không bật server
-    return generateSmartResponse(newMessage);
+    return generateSmartResponse(newMessage, language);
   }
 };

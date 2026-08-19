@@ -27,6 +27,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     history: List[ChatMessage] = []
     message: str
+    language: Optional[str] = "vi"
 
 # ==============================================================================
 # BỘ NÃO PYTHON SMART NLP & INTENT ENGINE (0đ - 100% Uptime - Không phụ thuộc API)
@@ -36,8 +37,16 @@ def normalize_text(text: str) -> str:
     """Chuẩn hóa văn bản: Chuyển chữ thường và loại bỏ khoảng trắng thừa."""
     return re.sub(r'\s+', ' ', text.strip().lower())
 
-def is_english_query(text: str) -> bool:
+def is_english_query(text: str, preferred_lang: Optional[str] = None) -> bool:
     """Nhận diện xem người dùng đang hỏi bằng tiếng Anh hay tiếng Việt."""
+    if preferred_lang == 'en':
+        return True
+    if preferred_lang == 'vi':
+        en_explicit = ['what is', 'how to', 'how can', 'why is', 'who is', 'tell me', 'can you', 'explain the']
+        if any(text.lower().startswith(s) for s in en_explicit):
+            return True
+        return False
+
     en_markers = [
         "what", "how", "why", "when", "where", "who", "which", "can you", 
         "tell me", "explain", "help", "hello", "hi", "good morning", "is", "are"
@@ -45,13 +54,13 @@ def is_english_query(text: str) -> bool:
     words = text.lower().split()
     return any(marker in words or text.lower().startswith(marker) for marker in en_markers)
 
-def generate_smart_response(user_message: str) -> str:
+def generate_smart_response(user_message: str, preferred_lang: Optional[str] = None) -> str:
     """
     Phân tích ý định (Intent Recognition) từ câu hỏi của người dùng
     và trả về câu trả lời tối ưu, chính xác nhất về Website & Tiếng Anh Lớp 6.
     """
     msg = normalize_text(user_message)
-    is_en = is_english_query(msg)
+    is_en = is_english_query(msg, preferred_lang)
 
     # --------------------------------------------------------------------------
     # 1. CHÀO HỎI & GIỚI THIỆU (GREETINGS & INTRODUCTIONS)
@@ -382,5 +391,5 @@ async def chat_with_ai(request: ChatRequest):
             print(f"External AI Error (falling back to Smart Engine): {e}")
 
     # Fallback mượt mà về Python Smart NLP Engine (0đ - tức thì - chuẩn 100%)
-    smart_reply = generate_smart_response(user_msg)
+    smart_reply = generate_smart_response(user_msg, request.language)
     return {"reply": smart_reply}
