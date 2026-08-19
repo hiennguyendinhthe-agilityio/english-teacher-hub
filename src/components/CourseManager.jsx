@@ -63,7 +63,7 @@ export default function CourseManager({ setActiveTab }) {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-indigo-500">
           <Loader2 className="h-12 w-12 animate-spin mb-4" />
-          <p className="text-lg font-medium">{t('fcLoading') || 'Loading courses...'}</p>
+          <p className="text-lg font-medium">{t('cmLoading')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

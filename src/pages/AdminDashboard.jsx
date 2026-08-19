@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { collection, getDocs, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { LogOut, BookOpen, Trash2, Edit, Plus, LayoutDashboard, Sparkles, Loader2, Eye, X } from 'lucide-react';
@@ -9,6 +10,7 @@ import InteractiveLesson from '../components/InteractiveLesson';
 
 export default function AdminDashboard() {
   const { currentUser, logout } = useAuth();
+  const { t } = useLanguage();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('courses'); // 'courses', 'importer', 'editor'
@@ -152,7 +154,7 @@ export default function AdminDashboard() {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 text-indigo-500">
                 <Loader2 className="w-12 h-12 animate-spin mb-4" />
-                <p className="font-medium">Đang tải dữ liệu từ Cloud...</p>
+                <p className="font-medium">{t('adminLoading')}</p>
               </div>
             ) : (
               <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-border/50 overflow-hidden">

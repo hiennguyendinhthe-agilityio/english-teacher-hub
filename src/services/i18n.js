@@ -55,6 +55,8 @@ export const translations = {
     cmEnterLesson: "Vào Bài Học",
     cmComingSoon: "Sắp ra mắt...",
     cmDeleteLesson: "Xóa Bài Giảng",
+    cmLoading: "Đang tải danh sách bài học...",
+    adminLoading: "Đang tải dữ liệu từ Cloud...",
 
     // ── Interactive Lesson ──
     ilPresenterBtn: "Trình Chiếu TV / Projector",
@@ -370,6 +372,8 @@ export const translations = {
     cmEnterLesson: "Enter Lesson",
     cmComingSoon: "Coming soon...",
     cmDeleteLesson: "Delete Lesson",
+    cmLoading: "Loading courses & lessons...",
+    adminLoading: "Loading cloud data...",
 
     // ── Interactive Lesson ──
     ilPresenterBtn: "TV / Projector Mode",
