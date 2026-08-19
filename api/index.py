@@ -54,8 +54,10 @@ async def chat_with_ai(request: ChatRequest):
     if not api_key:
         raise HTTPException(status_code=500, detail="Chưa cấu hình GEMINI_API_KEY trên Server")
         
+    model_name = os.getenv("GEMINI_MODEL", "gemini-pro-latest")
+    
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         
         # Chuyển đổi lịch sử
         contents = []
@@ -86,11 +88,17 @@ async def chat_with_ai(request: ChatRequest):
             response = await client.post(url, json=payload, timeout=30.0)
             
             if response.status_code != 200:
-                print(f"Gemini API Error: {response.text}")
+                print(f"Gemini API Error ({model_name}): {response.text}")
                 data = response.json()
-                if data.get("error", {}).get("code") == 503:
+                error_code = data.get("error", {}).get("code")
+                error_msg = data.get("error", {}).get("message", "")
+                
+                if response.status_code == 429 or error_code == 429:
+                    raise HTTPException(status_code=429, detail="Bạn đã vượt quá giới hạn gọi API của Google (Rate Limit / Quota). Vui lòng thử lại sau!")
+                elif response.status_code == 503 or error_code == 503:
                     raise HTTPException(status_code=503, detail="Máy chủ Google Gemini đang quá tải, vui lòng thử lại sau vài giây nhé!")
-                raise HTTPException(status_code=500, detail="Lỗi từ Google Gemini API")
+                else:
+                    raise HTTPException(status_code=500, detail=f"Lỗi từ Google Gemini ({model_name}): {error_msg}")
                 
             data = response.json()
             if "candidates" in data and len(data["candidates"]) > 0:
