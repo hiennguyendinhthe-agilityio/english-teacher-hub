@@ -1,3 +1,5 @@
+import { generateSmartResponse } from './smartChatEngine';
+
 // Backend API URL: Relative path in production (Vercel), absolute path for local development
 const BACKEND_URL = import.meta.env.PROD 
   ? '/api/chat' 
@@ -16,21 +18,20 @@ export const sendChatMessage = async (chatHistory, newMessage) => {
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Backend API Error:', errorData);
-      throw new Error(errorData.detail || 'Lỗi kết nối đến Server Backend');
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.reply) {
+        return data.reply;
+      }
     }
-
-    const data = await response.json();
-    return data.reply;
     
+    // Nếu backend phản hồi không 200, kích hoạt bộ não Smart Engine tại chỗ
+    console.warn('Backend returned non-200, activating client-side Smart NLP Engine');
+    return generateSmartResponse(newMessage);
+
   } catch (error) {
-    console.error('Chat AI Error:', error);
-    // Thay đổi thông báo một chút để dễ nhận biết lỗi này là do kết nối backend
-    if (error.message === 'Failed to fetch') {
-      throw new Error('Không thể kết nối đến Server Python. Hãy chắc chắn rằng bạn đã khởi động Server (uvicorn main:app) nhé!');
-    }
-    throw new Error(error.message || 'Xin lỗi, tôi đang gặp trục trặc kỹ thuật. Vui lòng thử lại sau nhé!');
+    console.warn('Backend fetch failed, activating resilient Smart NLP Engine:', error);
+    // Tự động trả lời thông minh bằng client-side engine khi mất mạng hoặc không bật server
+    return generateSmartResponse(newMessage);
   }
 };
