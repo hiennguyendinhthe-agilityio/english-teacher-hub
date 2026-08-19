@@ -81,7 +81,7 @@ export default function Sidebar({
             className="relative z-50 w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none animate-in slide-in-from-left duration-300"
           >
             {/* Mobile Header with Brand & Close Button */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-border min-h-[64px]">
+            <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
                   <BookOpen size={18} />
@@ -184,8 +184,8 @@ export default function Sidebar({
           isCollapsed ? "w-[78px]" : "w-[280px]"
         )}
       >
-        {/* Desktop Brand Header */}
-        <div className="flex items-center justify-between px-4 py-5 border-b border-border min-h-[76px]">
+        {/* Desktop Brand Header - Pixel-perfect aligned with Header.jsx (h-16 sm:h-20) */}
+        <div className="flex items-center justify-between px-4 h-16 sm:h-20 border-b border-border shrink-0">
           {!isCollapsed && (
             <div className="flex items-center gap-3 min-w-0 animate-in fade-in duration-300">
               <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
