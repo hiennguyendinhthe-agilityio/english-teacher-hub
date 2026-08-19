@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Key, Globe, Bell } from 'lucide-react';
+import { Sun, Moon, Key, Globe, Bell, Menu } from 'lucide-react';
 import { getStoredApiKey } from '../services/aiService';
 import { useLanguage } from '../context/LanguageContext';
 import { LANGUAGES } from '../services/i18n';
@@ -7,27 +7,47 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-export default function Header({ isDarkMode, setIsDarkMode, openSettings }) {
+export default function Header({ isDarkMode, setIsDarkMode, openSettings, onOpenMobileMenu }) {
   const hasApiKey = Boolean(getStoredApiKey());
   const { lang, setLanguage, t } = useLanguage();
 
   return (
-    <header className="h-20 bg-background/80 backdrop-blur-md border-b border-border px-8 flex items-center justify-between sticky top-0 z-30 w-full shadow-sm">
-      {/* Search / Title */}
-      <div className="flex-1 min-w-0 pr-4">
-        <h3 className="text-lg md:text-xl font-bold text-foreground m-0 truncate">{t('welcomeHeader')}</h3>
-        <p className="text-xs md:text-sm text-muted-foreground mt-1 truncate hidden sm:block">{t('welcomeSubheader')}</p>
+    <header className="h-16 sm:h-20 bg-background/85 backdrop-blur-xl border-b border-border px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 w-full shadow-xs transition-all">
+      {/* Left: Mobile Menu Toggle & Page Title */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 pr-2 sm:pr-4">
+        {/* Hamburger Menu button for Mobile (< 768px) */}
+        <Button
+          id="mobile-menu-toggle-btn"
+          variant="ghost"
+          size="icon"
+          onClick={onOpenMobileMenu}
+          className="md:hidden rounded-xl h-10 w-10 text-foreground hover:bg-secondary shrink-0 cursor-pointer"
+          aria-label="Open Mobile Menu"
+        >
+          <Menu size={22} />
+        </Button>
+
+        {/* Title & Subtitle */}
+        <div className="min-w-0">
+          <h3 className="text-base sm:text-lg md:text-xl font-extrabold text-foreground m-0 truncate leading-tight">
+            {t('welcomeHeader')}
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate hidden md:block">
+            {t('welcomeSubheader')}
+          </p>
+        </div>
       </div>
 
-      {/* Header Actions */}
-      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+      {/* Right: Actions */}
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
         {/* Language Selector Dropdown */}
-        <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-full border border-border hover:border-primary/30 transition-colors">
-          <Globe size={18} className="text-primary" />
+        <div className="flex items-center gap-1 sm:gap-2 bg-secondary/60 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-border/80 hover:border-primary/40 transition-colors">
+          <Globe size={15} className="text-primary shrink-0" />
           <select
             value={lang}
             onChange={(e) => setLanguage(e.target.value)}
-            className="bg-transparent border-none text-foreground font-semibold text-sm outline-none cursor-pointer focus:ring-0"
+            className="bg-transparent border-none text-foreground font-semibold text-xs sm:text-sm outline-none cursor-pointer focus:ring-0"
+            aria-label="Select Language"
           >
             {LANGUAGES.map((l) => (
               <option key={l.code} value={l.code} className="text-foreground bg-background">
@@ -37,30 +57,31 @@ export default function Header({ isDarkMode, setIsDarkMode, openSettings }) {
           </select>
         </div>
 
-        {/* API Status Badge */}
+        {/* API Status Badge (Icon on mobile, Text on tablet/desktop) */}
         <Button
           variant="outline"
           size="sm"
           onClick={openSettings}
+          title={hasApiKey ? t('geminiActive') : t('smartMockActive')}
           className={cn(
-            "rounded-full h-9 px-4 flex items-center gap-2 hover:-translate-y-0.5 transition-transform",
+            "rounded-full h-8 sm:h-9 px-2.5 sm:px-4 flex items-center gap-1.5 hover:-translate-y-0.5 transition-transform text-xs font-semibold cursor-pointer",
             hasApiKey 
               ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/20 hover:text-emerald-700" 
               : "bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500/20 hover:text-amber-700"
           )}
         >
-          <Key size={14} />
-          <span>{hasApiKey ? t('geminiActive') : t('smartMockActive')}</span>
+          <Key size={14} className="shrink-0" />
+          <span className="hidden sm:inline truncate max-w-[130px]">{hasApiKey ? t('geminiActive') : t('smartMockActive')}</span>
         </Button>
 
         {/* Notifications */}
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full relative text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+          className="rounded-full h-8 w-8 sm:h-9 sm:w-9 relative text-muted-foreground hover:text-foreground hover:bg-secondary/80 hidden sm:flex cursor-pointer"
         >
-          <Bell size={20} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
+          <Bell size={18} />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
         </Button>
 
         {/* Theme Switcher */}
@@ -68,17 +89,17 @@ export default function Header({ isDarkMode, setIsDarkMode, openSettings }) {
           variant="ghost"
           size="icon"
           onClick={() => setIsDarkMode(!isDarkMode)}
-          className="rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary/80 hover:rotate-12 transition-transform"
+          className="rounded-full h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-secondary/80 hover:rotate-12 transition-transform cursor-pointer"
           aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
-          {isDarkMode ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} className="text-indigo-500" />}
+          {isDarkMode ? <Sun size={18} className="text-amber-500" /> : <Moon size={18} className="text-indigo-500" />}
         </Button>
 
-        <div className="w-[1px] h-6 bg-border mx-1"></div>
+        <div className="w-[1px] h-5 sm:h-6 bg-border mx-0.5 sm:mx-1 hidden sm:block"></div>
 
         {/* Student Avatar */}
         <div 
-          className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-md hover:scale-105 transition-transform cursor-pointer"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md hover:scale-105 transition-transform cursor-pointer shrink-0"
           title="Học Sinh"
         >
           HS

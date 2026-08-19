@@ -138,14 +138,14 @@ export default function AdminDashboard() {
           </div>
         ) : activeTab === 'courses' ? (
           <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
-            <div className="flex justify-between items-end mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-extrabold mb-2">Danh sách Khóa học</h1>
-                <p className="text-muted-foreground">Quản lý toàn bộ dữ liệu đang có trên Firebase</p>
+                <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Danh sách Khóa học</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">Quản lý toàn bộ dữ liệu đang có trên Firebase</p>
               </div>
               <button 
                 onClick={() => handleOpenEditor(null)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all"
+                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
               >
                 <Plus size={18} /> Thêm mới
               </button>
@@ -157,8 +157,8 @@ export default function AdminDashboard() {
                 <p className="font-medium">{t('adminLoading')}</p>
               </div>
             ) : (
-              <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-                <table className="w-full text-left">
+              <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-border/50 overflow-x-auto">
+                <table className="w-full min-w-[620px] text-left">
                   <thead className="bg-slate-50 dark:bg-zinc-950/50 border-b border-border/50 text-muted-foreground text-sm font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="px-6 py-4">Tên bài học (Title)</th>

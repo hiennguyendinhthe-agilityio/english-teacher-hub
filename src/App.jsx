@@ -24,6 +24,7 @@ function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -81,13 +82,15 @@ function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Navigation Sidebar */}
+      {/* Navigation Sidebar (Desktop + Mobile Drawer) */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         openSettings={() => setIsSettingsOpen(true)}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
+        isMobileOpen={isMobileMenuOpen}
+        setIsMobileOpen={setIsMobileMenuOpen}
       />
 
       {/* Main Content Area */}
@@ -96,8 +99,9 @@ function AppLayout() {
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
           openSettings={() => setIsSettingsOpen(true)}
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8">
           {renderContent()}
         </main>
       </div>
