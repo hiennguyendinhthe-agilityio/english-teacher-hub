@@ -55,7 +55,7 @@ async def chat_with_ai(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Chưa cấu hình GEMINI_API_KEY trên Server")
         
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
         
         # Chuyển đổi lịch sử
         contents = []
