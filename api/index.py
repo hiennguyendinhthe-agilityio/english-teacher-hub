@@ -87,6 +87,14 @@ async def chat_with_ai(request: ChatRequest):
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=payload, timeout=30.0)
             
+            # Nếu Pro bị giới hạn Quota (429) hoặc lỗi model (404), tự động fallback về Flash
+            if response.status_code != 200 and model_name != "gemini-flash-latest":
+                print(f"Model {model_name} failed with {response.status_code}, falling back to gemini-flash-latest...")
+                fallback_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+                fallback_resp = await client.post(fallback_url, json=payload, timeout=30.0)
+                if fallback_resp.status_code == 200:
+                    response = fallback_resp
+            
             if response.status_code != 200:
                 print(f"Gemini API Error ({model_name}): {response.text}")
                 data = response.json()
@@ -98,7 +106,7 @@ async def chat_with_ai(request: ChatRequest):
                 elif response.status_code == 503 or error_code == 503:
                     raise HTTPException(status_code=503, detail="Máy chủ Google Gemini đang quá tải, vui lòng thử lại sau vài giây nhé!")
                 else:
-                    raise HTTPException(status_code=500, detail=f"Lỗi từ Google Gemini ({model_name}): {error_msg}")
+                    raise HTTPException(status_code=500, detail=f"Lỗi từ Google Gemini: {error_msg}")
                 
             data = response.json()
             if "candidates" in data and len(data["candidates"]) > 0:
