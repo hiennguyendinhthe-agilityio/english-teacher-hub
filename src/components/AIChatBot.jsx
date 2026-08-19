@@ -129,15 +129,15 @@ export default function AIChatBot() {
       <div 
         id="ai-chatbot-window"
         className={cn(
-          "fixed bottom-24 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[430px] h-[550px] max-h-[85vh] bg-background/95 backdrop-blur-xl border border-indigo-200/60 dark:border-indigo-900/50 rounded-3xl shadow-2xl flex flex-col z-[100] transition-all duration-300 origin-bottom-right overflow-hidden",
+          "fixed inset-x-3 bottom-18 sm:inset-auto sm:bottom-24 sm:right-6 w-auto sm:w-[420px] h-[66vh] max-h-[510px] sm:h-[540px] sm:max-h-[80vh] bg-background/95 backdrop-blur-xl border border-indigo-200/60 dark:border-indigo-900/50 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col z-[100] transition-all duration-300 origin-bottom-right overflow-hidden",
           isOpen ? "scale-100 opacity-100 shadow-indigo-500/25" : "scale-0 opacity-0 pointer-events-none"
         )}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4 flex justify-between items-center text-white shrink-0 shadow-md">
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-3.5 py-3 sm:p-4 flex justify-between items-center text-white shrink-0 shadow-md">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-inner">
-              <Bot size={20} className="text-white" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shadow-inner shrink-0">
+              <Bot size={18} className="text-white" />
             </div>
             <div>
               <div className="font-bold text-sm tracking-wide flex items-center gap-1.5">
@@ -278,9 +278,9 @@ export default function AIChatBot() {
         id="ai-chatbot-fab"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open AI Assistant"
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white shadow-xl shadow-indigo-600/30 flex items-center justify-center z-[100] transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-white/20 cursor-pointer"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white shadow-xl shadow-indigo-600/30 flex items-center justify-center z-[100] transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-white/20 cursor-pointer"
       >
-        <MessageSquare size={24} className={cn("transition-transform duration-300", isOpen && "rotate-90 scale-90")} />
+        <MessageSquare size={22} className={cn("transition-transform duration-300", isOpen && "rotate-90 scale-90")} />
       </Button>
     </>
   );
