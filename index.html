@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Instant Zero-Latency Pre-Boot Splash Styles -->
+    <!-- Instant Zero-Latency Unified Splash Screen (Native App Grade) -->
     <style>
       html, body {
         margin: 0;
@@ -33,7 +33,7 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         overflow: hidden;
       }
-      .pre-splash {
+      #app-splash {
         position: fixed;
         inset: 0;
         display: flex;
@@ -41,14 +41,22 @@
         align-items: center;
         justify-content: center;
         background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 50%, #020617 100%);
-        z-index: 9999;
+        z-index: 99999;
         user-select: none;
+        transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 1;
+        transform: scale(1);
       }
-      .pre-splash-icon-wrap {
+      #app-splash.splash-fade-out {
+        opacity: 0;
+        transform: scale(1.03);
+        pointer-events: none;
+      }
+      .app-splash-icon-wrap {
         position: relative;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
       }
-      .pre-splash-icon {
+      .app-splash-icon {
         width: 88px;
         height: 88px;
         border-radius: 24px;
@@ -56,9 +64,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4), 0 8px 10px -6px rgba(79, 70, 229, 0.2);
+        box-shadow: 0 12px 28px -5px rgba(79, 70, 229, 0.45), 0 8px 10px -6px rgba(79, 70, 229, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
-      .pre-splash-icon svg {
+      .app-splash-icon svg {
         width: 44px;
         height: 44px;
         fill: none;
@@ -67,59 +76,61 @@
         stroke-linecap: round;
         stroke-linejoin: round;
       }
-      .pre-splash-title {
+      .app-splash-title {
         font-size: 24px;
         font-weight: 800;
         letter-spacing: -0.025em;
         color: #ffffff;
         margin: 0 0 6px 0;
       }
-      .pre-splash-subtitle {
+      .app-splash-subtitle {
         font-size: 13px;
         color: #a5b4fc;
         margin: 0 0 28px 0;
         font-weight: 500;
       }
-      .pre-splash-loader {
+      .app-splash-loader {
         width: 160px;
         height: 4px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.12);
         border-radius: 9999px;
         overflow: hidden;
       }
-      .pre-splash-loader-bar {
+      .app-splash-loader-bar {
         width: 100%;
         height: 100%;
         background: linear-gradient(90deg, #4f46e5, #c084fc, #ec4899);
         border-radius: 9999px;
-        animation: pre-loader-anim 1.5s ease-in-out infinite;
+        animation: splash-loader-anim 1.4s ease-in-out infinite;
       }
-      @keyframes pre-loader-anim {
+      @keyframes splash-loader-anim {
         0% { transform: translateX(-100%); }
         100% { transform: translateX(100%); }
       }
     </style>
   </head>
   <body>
-    <div id="root">
-      <!-- Instant Zero-Latency Pre-Boot Shell (rendered immediately at Frame 0) -->
-      <div class="pre-splash">
-        <div class="pre-splash-icon-wrap">
-          <div class="pre-splash-icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-              <path d="M6 6h10"></path>
-              <path d="M6 10h10"></path>
-            </svg>
-          </div>
-        </div>
-        <h1 class="pre-splash-title">Ms Van English</h1>
-        <p class="pre-splash-subtitle">Interactive AI Learning &amp; Teaching Hub</p>
-        <div class="pre-splash-loader">
-          <div class="pre-splash-loader-bar"></div>
+    <!-- Persistent Zero-Flicker Native Splash Overlay -->
+    <div id="app-splash">
+      <div class="app-splash-icon-wrap">
+        <div class="app-splash-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+            <path d="M6 6h10"></path>
+            <path d="M6 10h10"></path>
+          </svg>
         </div>
       </div>
+      <h1 class="app-splash-title">Ms Van English</h1>
+      <p class="app-splash-subtitle">Interactive Learning &amp; Teaching Hub</p>
+      <div class="app-splash-loader">
+        <div class="app-splash-loader-bar"></div>
+      </div>
     </div>
+
+    <!-- React Root -->
+    <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

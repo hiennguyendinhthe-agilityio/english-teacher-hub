@@ -51,4 +51,22 @@ describe('App Main Component with Lazy Loading & Suspense', () => {
       expect(screen.queryByText(/Google Gemini API Key/i)).not.toBeInTheDocument();
     });
   });
+
+  it('fades out native splash screen element when app mounts', () => {
+    const splash = document.createElement('div');
+    splash.id = 'app-splash';
+    document.body.appendChild(splash);
+
+    vi.useFakeTimers();
+    render(<App />);
+
+    vi.advanceTimersByTime(800);
+    expect(splash.classList.contains('splash-fade-out')).toBe(true);
+
+    vi.advanceTimersByTime(500);
+    expect(splash.style.display).toBe('none');
+
+    splash.remove();
+    vi.useRealTimers();
+  });
 });

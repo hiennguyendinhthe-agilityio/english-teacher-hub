@@ -20,7 +20,6 @@ const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import AIChatBot from './components/AIChatBot';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import SplashScreen from './components/SplashScreen';
 
 function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -37,6 +36,20 @@ function AppLayout() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Smoothly dissolve the persistent native splash screen once React is mounted
+  useEffect(() => {
+    const splash = document.getElementById('app-splash');
+    if (splash) {
+      const timer = setTimeout(() => {
+        splash.classList.add('splash-fade-out');
+        setTimeout(() => {
+          splash.style.display = 'none';
+        }, 450);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Auto scroll main container to top whenever active tab changes
   useEffect(() => {
@@ -137,9 +150,6 @@ function AppLayout() {
 
       {/* PWA Mobile App Install Prompt Banner */}
       <PWAInstallPrompt />
-
-      {/* Intro Launch / Splash Screen Animation */}
-      <SplashScreen />
     </div>
   );
 }
