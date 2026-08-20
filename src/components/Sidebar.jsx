@@ -68,17 +68,17 @@ export default function Sidebar({
       {/* 1. MOBILE DRAWER OVERLAY & SLIDE-OVER SHEET (Visible on < 768px screens)  */}
       {/* ========================================================================= */}
       {isMobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex">
+        <div className="md:hidden fixed inset-0 z-[200] flex">
           {/* Backdrop Blur Overlay */}
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
             onClick={() => setIsMobileOpen(false)}
             aria-hidden="true"
           />
 
           {/* Slide-in Mobile Drawer */}
           <aside 
-            className="relative z-50 w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none animate-in slide-in-from-left duration-300"
+            className="relative z-[210] w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none animate-in slide-in-from-left duration-300"
           >
             {/* Mobile Header with Brand & Close Button */}
             <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">

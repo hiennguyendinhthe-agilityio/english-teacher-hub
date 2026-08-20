@@ -172,14 +172,14 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, lang
         transform: `translateX(${dragX}px) translateY(${dragY * 0.3}px) rotate(${tiltDeg}deg)`,
         transition: 'none',
         cursor: 'grabbing',
-        zIndex: 50,
+        zIndex: 10,
       };
     } else {
       cardStyle = {
         transform: `translateX(0) rotate(0deg)`,
         transition: 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
         cursor: 'grab',
-        zIndex: 50,
+        zIndex: 10,
       };
     }
   } else {
@@ -189,7 +189,7 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, lang
     cardStyle = {
       transform: `scale(${scale}) translateY(${ty}px)`,
       transition: isDragging ? 'transform 0.1s' : 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
-      zIndex: 50 - stackIndex * 10,
+      zIndex: Math.max(1, 10 - stackIndex * 2),
       pointerEvents: 'none',
     };
   }
@@ -463,7 +463,7 @@ export default function FlashcardBuilder() {
           {currentIndex < allCards.length ? (
             <>
               {/* Card Stack */}
-              <div className="relative w-full max-w-[340px] sm:max-w-md h-[390px] sm:h-[420px] select-none touch-none">
+              <div className="relative w-full max-w-[340px] sm:max-w-md h-[390px] sm:h-[420px] select-none touch-none isolate">
                 {[...visibleCards].reverse().map(({ card, idx }, revI) => {
                   const stackIndex = visibleCards.length - 1 - revI;
                   const isTop = stackIndex === 0;

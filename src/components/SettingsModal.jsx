@@ -25,7 +25,7 @@ export default function SettingsModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4 animate-in fade-in duration-200">
       <Card className="w-full max-w-lg shadow-2xl border-none ring-1 ring-white/20 animate-in zoom-in-95 duration-200 bg-background/95 backdrop-blur-md">
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
           <div className="flex items-center gap-3">
