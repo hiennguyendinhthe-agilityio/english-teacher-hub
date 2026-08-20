@@ -30,7 +30,7 @@ function toFlashcards(vocab) {
   }));
 }
 
-const SWIPE_THRESHOLD = 100;
+const SWIPE_THRESHOLD = 70;
 
 // Individual swipeable card
 function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, language }) {
@@ -40,34 +40,86 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, lang
   const [isFlipped, setIsFlipped] = useState(false);
   const [flyOut, setFlyOut] = useState(null); // 'left' | 'right' | null
   const dragStart = useRef(null);
+  const hasDraggedRef = useRef(false);
 
-  useEffect(() => { setIsFlipped(false); }, [card]);
+  useEffect(() => { 
+    setIsFlipped(false); 
+    setFlyOut(null);
+    setDragX(0);
+    setDragY(0);
+    setIsDragging(false);
+    hasDraggedRef.current = false;
+  }, [card]);
 
   const tiltDeg = Math.min(Math.max(dragX / 12, -20), 20);
 
   const onPointerDown = (e) => {
-    if (!isTop) return;
-    dragStart.current = { x: e.clientX, y: e.clientY };
+    if (!isTop || flyOut) return;
+    if (e.button !== undefined && e.button !== 0) return;
+    
+    hasDraggedRef.current = false;
+    dragStart.current = { x: e.clientX, y: e.clientY, time: Date.now() };
     setIsDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
   };
+
   const onPointerMove = (e) => {
-    if (!isDragging || !dragStart.current) return;
-    setDragX(e.clientX - dragStart.current.x);
-    setDragY(e.clientY - dragStart.current.y);
+    if (!isDragging || !dragStart.current || flyOut) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
+    
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+      hasDraggedRef.current = true;
+    }
+    setDragX(dx);
+    setDragY(dy);
   };
-  const onPointerUp = () => {
-    if (!isDragging) return;
+
+  const onPointerUp = (e) => {
+    if (!isDragging || !dragStart.current) return;
     setIsDragging(false);
-    if (dragX < -SWIPE_THRESHOLD) {
-      triggerFlyOut('left');
-    } else if (dragX > SWIPE_THRESHOLD) {
-      triggerFlyOut('right');
+
+    const dx = dragX;
+    const dt = Date.now() - dragStart.current.time;
+    const velocity = Math.abs(dx) / (dt || 1); // px per ms
+
+    // Quick swipe flick (velocity > 0.45 and moved > 35px) OR full swipe displacement (> SWIPE_THRESHOLD)
+    const isQuickFlick = velocity > 0.45 && Math.abs(dx) > 35;
+    const isFullSwipe = Math.abs(dx) >= SWIPE_THRESHOLD;
+
+    if (isFullSwipe || isQuickFlick) {
+      if (dx < 0) {
+        triggerFlyOut('left');
+      } else {
+        triggerFlyOut('right');
+      }
     } else {
       setDragX(0);
       setDragY(0);
     }
+
+    try {
+      if (e?.currentTarget && e?.pointerId !== undefined) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {}
+
     dragStart.current = null;
+  };
+
+  const onPointerCancel = (e) => {
+    setIsDragging(false);
+    setDragX(0);
+    setDragY(0);
+    dragStart.current = null;
+    hasDraggedRef.current = false;
+    try {
+      if (e?.currentTarget && e?.pointerId !== undefined) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {}
   };
 
   const triggerFlyOut = (dir) => {
@@ -75,11 +127,11 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, lang
     setTimeout(() => {
       if (dir === 'left') onSwipeLeft();
       else onSwipeRight();
-    }, 380);
+    }, 350);
   };
 
   const handleCardClick = () => {
-    if (!isTop || Math.abs(dragX) > 5) return;
+    if (!isTop || hasDraggedRef.current || flyOut) return;
     setIsFlipped(f => !f);
   };
 
@@ -104,14 +156,14 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, lang
     if (flyOut === 'left') {
       cardStyle = {
         transform: `translateX(-140%) rotate(-30deg)`,
-        transition: 'transform 0.38s cubic-bezier(0.5, 0, 1, 0.5), opacity 0.38s',
+        transition: 'transform 0.35s cubic-bezier(0.5, 0, 1, 0.5), opacity 0.35s',
         opacity: 0,
         pointerEvents: 'none',
       };
     } else if (flyOut === 'right') {
       cardStyle = {
         transform: `translateX(140%) rotate(30deg)`,
-        transition: 'transform 0.38s cubic-bezier(0.5, 0, 1, 0.5), opacity 0.38s',
+        transition: 'transform 0.35s cubic-bezier(0.5, 0, 1, 0.5), opacity 0.35s',
         opacity: 0,
         pointerEvents: 'none',
       };
@@ -142,16 +194,20 @@ function SwipeCard({ card, isTop, stackIndex, onSwipeLeft, onSwipeRight, t, lang
     };
   }
 
-  const swipeLeft = isTop && !flyOut && dragX < -40;
-  const swipeRight = isTop && !flyOut && dragX > 40;
+  const swipeLeft = isTop && !flyOut && dragX < -35;
+  const swipeRight = isTop && !flyOut && dragX > 35;
 
   return (
     <div
-      className="absolute w-full h-full [perspective:1200px]"
+      className={cn(
+        "absolute w-full h-full [perspective:1200px] select-none touch-none",
+        isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"
+      )}
       style={cardStyle}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
       onClick={handleCardClick}
     >
       {/* Swipe indicator stamps */}
@@ -407,7 +463,7 @@ export default function FlashcardBuilder() {
           {currentIndex < allCards.length ? (
             <>
               {/* Card Stack */}
-              <div className="relative w-full max-w-md h-[400px]">
+              <div className="relative w-full max-w-[340px] sm:max-w-md h-[390px] sm:h-[420px] select-none touch-none">
                 {[...visibleCards].reverse().map(({ card, idx }, revI) => {
                   const stackIndex = visibleCards.length - 1 - revI;
                   const isTop = stackIndex === 0;

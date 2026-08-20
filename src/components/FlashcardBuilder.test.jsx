@@ -8,6 +8,7 @@ import { LanguageProvider } from '../context/LanguageContext';
 
 if (typeof window !== 'undefined') {
   window.HTMLElement.prototype.hasPointerCapture = vi.fn();
+  window.HTMLElement.prototype.setPointerCapture = vi.fn();
   window.HTMLElement.prototype.releasePointerCapture = vi.fn();
   // Mock SpeechSynthesis
   window.speechSynthesis = { speak: vi.fn() };
@@ -39,6 +40,25 @@ describe('FlashcardBuilder Component', () => {
       // Flip buttons and navigation should be present
       const flipBtns = screen.getAllByText(/Lật Thẻ|Bấm để lật/i);
       expect(flipBtns.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('navigates through cards using action buttons', async () => {
+    render(
+      <LanguageProvider>
+        <FlashcardBuilder />
+      </LanguageProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/\/ 22/i)).toBeInTheDocument();
+    });
+
+    const nextBtn = screen.getByTitle('Thẻ Tiếp');
+    nextBtn.click();
+
+    await waitFor(() => {
+      expect(screen.getByText('2', { selector: '.text-2xl' })).toBeInTheDocument();
     });
   });
 });
