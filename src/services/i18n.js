@@ -330,6 +330,17 @@ export const translations = {
     pwaInstallInstalled: "Ứng Dụng Đã Cài",
     pwaIosShareTip: "Trên iPhone: Nhấn nút Chia sẻ 📤 rồi chọn 'Thêm vào MH chính' ➕",
     pwaClose: "Đóng",
+    pwaIosModalIntro: "Thực hiện 2 bước đơn giản trên Safari để cài đặt ứng dụng vào iPhone của bạn:",
+    pwaIosStep1Title: "Bấm nút Chia sẻ (Share)",
+    pwaIosStep1Desc: "Nằm ở thanh công cụ dưới cùng của Safari (biểu tượng 📤)",
+    pwaIosStep2Title: "Chọn 'Thêm vào MH chính'",
+    pwaIosStep2Desc: "Cuộn xuống danh sách và chọn 'Thêm vào Màn hình chính' (➕)",
+    pwaIosGotIt: "Đã Hiểu!",
+
+    // ── Splash Screen ──
+    splashSubtitle: "Nền Tảng Dạy & Học Tiếng Anh Thông Minh",
+    splashSkip: "Chạm để vào nhanh",
+    splashLoading: "Đang chuẩn bị bài học...",
   },
 
   en: {
@@ -652,6 +663,17 @@ export const translations = {
     pwaInstallInstalled: "App Installed",
     pwaIosShareTip: "On iPhone: Tap Share 📤 then select 'Add to Home Screen' ➕",
     pwaClose: "Dismiss",
+    pwaIosModalIntro: "Follow these 2 simple steps in Safari to install Ms Van English on your iPhone:",
+    pwaIosStep1Title: "Tap the Share button",
+    pwaIosStep1Desc: "Located at the bottom bar in Safari (square with arrow 📤)",
+    pwaIosStep2Title: "Select 'Add to Home Screen'",
+    pwaIosStep2Desc: "Scroll down and tap 'Add to Home Screen' (➕)",
+    pwaIosGotIt: "Got It!",
+
+    // ── Splash Screen ──
+    splashSubtitle: "Interactive AI Learning & Teaching Hub",
+    splashSkip: "Tap anywhere to skip",
+    splashLoading: "Loading interactive lessons...",
   }
 };
 

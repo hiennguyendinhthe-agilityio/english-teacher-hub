@@ -15,8 +15,11 @@ export function LanguageProvider({ children }) {
     return translations[lang]?.[key] || translations['en']?.[key] || key;
   };
 
+  const isEn = lang === 'en';
+  const isVi = lang === 'vi';
+
   return (
-    <LanguageContext.Provider value={{ lang, setLanguage, t }}>
+    <LanguageContext.Provider value={{ lang, setLanguage, t, isEn, isVi }}>
       {children}
     </LanguageContext.Provider>
   );

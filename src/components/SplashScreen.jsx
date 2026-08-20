@@ -94,8 +94,8 @@ export default function SplashScreen({ onFinish = () => {} }) {
         </h1>
         
         <p className="text-xs sm:text-sm text-indigo-200/80 font-medium tracking-wide mb-8 max-w-xs flex items-center justify-center gap-1.5">
-          <GraduationCap size={16} className="text-pink-400" />
-          <span>{isEn ? "Interactive AI Learning & Teaching Hub" : "Nền Tảng Dạy & Học Tiếng Anh Thông Minh"}</span>
+          <GraduationCap size={16} className="text-pink-400 shrink-0" />
+          <span>{t('splashSubtitle')}</span>
         </p>
 
         {/* Sleek Progress Loading Bar */}
@@ -108,7 +108,7 @@ export default function SplashScreen({ onFinish = () => {} }) {
 
         {/* Small Tap to Skip Hint */}
         <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
-          {isEn ? "Tap anywhere to skip" : "Chạm để vào nhanh"}
+          {t('splashSkip')}
         </span>
       </div>
     </div>

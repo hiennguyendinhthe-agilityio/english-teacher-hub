@@ -159,25 +159,23 @@ export default function PWAInstallPrompt() {
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {isEn 
-                ? "Follow these 2 simple steps in Safari to install Ms Van English on your iPhone:" 
-                : "Thực hiện 2 bước đơn giản trên Safari để cài đặt ứng dụng vào iPhone của bạn:"}
+              {t('pwaIosModalIntro')}
             </p>
 
             <div className="space-y-2.5 text-xs">
               <div className="flex items-start gap-3 bg-secondary/60 p-3 rounded-2xl border border-border/50">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center shrink-0">1</span>
                 <div>
-                  <p className="font-semibold text-foreground">{isEn ? "Tap the Share button" : "Bấm nút Chia sẻ (Share)"}</p>
-                  <p className="text-muted-foreground text-[11px] mt-0.5">{isEn ? "Located at the bottom bar in Safari (square with arrow 📤)" : "Nằm ở thanh công cụ dưới cùng của Safari (biểu tượng 📤)"}</p>
+                  <p className="font-semibold text-foreground">{t('pwaIosStep1Title')}</p>
+                  <p className="text-muted-foreground text-[11px] mt-0.5">{t('pwaIosStep1Desc')}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 bg-secondary/60 p-3 rounded-2xl border border-border/50">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center shrink-0">2</span>
                 <div>
-                  <p className="font-semibold text-foreground">{isEn ? "Select 'Add to Home Screen'" : "Chọn 'Thêm vào MH chính'"}</p>
-                  <p className="text-muted-foreground text-[11px] mt-0.5">{isEn ? "Scroll down and tap 'Add to Home Screen' (➕)" : "Cuộn xuống danh sách và chọn 'Thêm vào Màn hình chính' (➕)"}</p>
+                  <p className="font-semibold text-foreground">{t('pwaIosStep2Title')}</p>
+                  <p className="text-muted-foreground text-[11px] mt-0.5">{t('pwaIosStep2Desc')}</p>
                 </div>
               </div>
             </div>
@@ -186,7 +184,7 @@ export default function PWAInstallPrompt() {
               onClick={() => setShowIosModal(false)}
               className="w-full rounded-2xl h-11 font-bold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
             >
-              <Check size={16} className="mr-1.5" /> {isEn ? "Got It!" : "Đã Hiểu!"}
+              <Check size={16} className="mr-1.5" /> {t('pwaIosGotIt')}
             </Button>
           </div>
         </div>
