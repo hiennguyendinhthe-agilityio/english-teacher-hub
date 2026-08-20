@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,6 +28,7 @@ function AppLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const mainScrollRef = useRef(null);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -36,6 +37,19 @@ function AppLayout() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Auto scroll main container to top whenever active tab changes
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = 0;
+      if (typeof mainScrollRef.current.scrollTo === 'function') {
+        mainScrollRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  }, [activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -103,7 +117,7 @@ function AppLayout() {
           openSettings={() => setIsSettingsOpen(true)}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8">
+        <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-8">
           {renderContent()}
         </main>
       </div>
