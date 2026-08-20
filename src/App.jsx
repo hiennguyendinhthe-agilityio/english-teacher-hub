@@ -82,7 +82,7 @@ function AppLayout() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-[100dvh] overflow-hidden bg-background">
       {/* Navigation Sidebar (Desktop + Mobile Drawer) */}
       <Sidebar
         activeTab={activeTab}

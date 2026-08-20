@@ -86,7 +86,7 @@ export default function Sidebar({
         {/* Slide-in / Slide-out Mobile Drawer */}
         <aside 
           className={cn(
-            "relative z-[210] w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none transition-transform duration-300 ease-in-out",
+            "relative z-[210] w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none transition-transform duration-300 ease-in-out pt-[env(safe-area-inset-top,0px)]",
             isMobileOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
@@ -171,7 +171,7 @@ export default function Sidebar({
           </nav>
 
           {/* Mobile Settings Footer */}
-          <div className="p-3 border-t border-border bg-secondary/20">
+          <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] border-t border-border bg-secondary/20 shrink-0">
             <Button
               variant="ghost"
               onClick={handleOpenSettings}

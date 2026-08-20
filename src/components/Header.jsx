@@ -12,7 +12,7 @@ export default function Header({ isDarkMode, setIsDarkMode, openSettings, onOpen
   const { lang, setLanguage, t } = useLanguage();
 
   return (
-    <header className="h-16 sm:h-20 bg-background/85 backdrop-blur-xl border-b border-border px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 w-full shadow-xs transition-all">
+    <header className="h-[calc(4rem+env(safe-area-inset-top,0px))] sm:h-20 pt-[env(safe-area-inset-top,0px)] sm:pt-0 bg-background/85 backdrop-blur-xl border-b border-border px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 w-full shadow-xs transition-all">
       {/* Left: Mobile Menu Toggle & Page Title */}
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 pr-2 sm:pr-4">
         {/* Hamburger Menu button for Mobile (< 768px) */}

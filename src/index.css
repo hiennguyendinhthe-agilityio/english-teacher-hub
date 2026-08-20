@@ -70,13 +70,13 @@
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground min-h-screen;
+  html, body {
+    @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
+    height: 100%;
+    width: 100%;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
