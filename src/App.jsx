@@ -20,6 +20,7 @@ const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import AIChatBot from './components/AIChatBot';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import SplashScreen from './components/SplashScreen';
 
 function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -122,6 +123,9 @@ function AppLayout() {
 
       {/* PWA Mobile App Install Prompt Banner */}
       <PWAInstallPrompt />
+
+      {/* Intro Launch / Splash Screen Animation */}
+      <SplashScreen />
     </div>
   );
 }
