@@ -321,9 +321,15 @@ export const translations = {
     chatBotChipAIImporter: "📑 Tạo bài học AI",
     chatBotChipEssay: "✍️ Chấm bài luận",
     chatBotChipWorksheet: "📄 In đề thi PDF",
-    chatBotChipUnit1: "🏫 Tóm tắt Unit 1",
-    chatBotChipGrammar: "💡 Thì hiện tại đơn",
     chatBotFollowUpTitle: "Bạn có muốn tìm hiểu thêm:",
+
+    // ── PWA Mobile App ──
+    pwaInstallTitle: "Cài Đặt Ứng Dụng",
+    pwaInstallDesc: "Cài đặt Ms Van English lên màn hình chính để học tập mượt mà và tiện lợi hơn.",
+    pwaInstallBtn: "Cài Đặt Ngay",
+    pwaInstallInstalled: "Ứng Dụng Đã Cài",
+    pwaIosShareTip: "Trên iPhone: Nhấn nút Chia sẻ 📤 rồi chọn 'Thêm vào MH chính' ➕",
+    pwaClose: "Đóng",
   },
 
   en: {
@@ -637,10 +643,15 @@ export const translations = {
     chatBotChipFlashcards: "🎴 Flashcards Guide",
     chatBotChipAIImporter: "📑 AI Importer",
     chatBotChipEssay: "✍️ Essay Grader",
-    chatBotChipWorksheet: "📄 PDF Worksheet",
-    chatBotChipUnit1: "🏫 Unit 1 Summary",
-    chatBotChipGrammar: "💡 Present Simple",
     chatBotFollowUpTitle: "Suggested next steps:",
+
+    // ── PWA Mobile App ──
+    pwaInstallTitle: "Install Mobile App",
+    pwaInstallDesc: "Add Ms Van English to your Home Screen for faster offline-ready learning.",
+    pwaInstallBtn: "Install App",
+    pwaInstallInstalled: "App Installed",
+    pwaIosShareTip: "On iPhone: Tap Share 📤 then select 'Add to Home Screen' ➕",
+    pwaClose: "Dismiss",
   }
 };
 

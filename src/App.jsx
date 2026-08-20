@@ -19,6 +19,7 @@ const AIImporter = lazy(() => import('./components/AIImporter'));
 const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import AIChatBot from './components/AIChatBot';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -118,6 +119,9 @@ function AppLayout() {
 
       {/* Global AI Chat Assistant */}
       <AIChatBot />
+
+      {/* PWA Mobile App Install Prompt Banner */}
+      <PWAInstallPrompt />
     </div>
   );
 }
