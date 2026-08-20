@@ -67,113 +67,122 @@ export default function Sidebar({
       {/* ========================================================================= */}
       {/* 1. MOBILE DRAWER OVERLAY & SLIDE-OVER SHEET (Visible on < 768px screens)  */}
       {/* ========================================================================= */}
-      {isMobileOpen && (
-        <div className="md:hidden fixed inset-0 z-[200] flex">
-          {/* Backdrop Blur Overlay */}
-          <div 
-            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
-            onClick={() => setIsMobileOpen(false)}
-            aria-hidden="true"
-          />
+      <div 
+        className={cn(
+          "md:hidden fixed inset-0 z-[200] flex transition-all duration-300",
+          isMobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
+        )}
+      >
+        {/* Backdrop Blur Overlay */}
+        <div 
+          className={cn(
+            "fixed inset-0 z-[200] bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-in-out",
+            isMobileOpen ? "opacity-100" : "opacity-0"
+          )}
+          onClick={() => setIsMobileOpen(false)}
+          aria-hidden="true"
+        />
 
-          {/* Slide-in Mobile Drawer */}
-          <aside 
-            className="relative z-[210] w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none animate-in slide-in-from-left duration-300"
-          >
-            {/* Mobile Header with Brand & Close Button */}
-            <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
-                  <BookOpen size={18} />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-sm font-extrabold leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 truncate">
-                    {t('brandName')}
-                  </h2>
-                  <p className="text-[10px] text-muted-foreground font-medium truncate">
-                    {t('brandSubtitle')}
-                  </p>
-                </div>
+        {/* Slide-in / Slide-out Mobile Drawer */}
+        <aside 
+          className={cn(
+            "relative z-[210] w-[290px] max-w-[85vw] h-full bg-background/95 backdrop-blur-2xl border-r border-border shadow-2xl flex flex-col select-none transition-transform duration-300 ease-in-out",
+            isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          {/* Mobile Header with Brand & Close Button */}
+          <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 shrink-0">
+                <BookOpen size={18} />
               </div>
-
-              <Button 
-                id="mobile-menu-close-btn"
-                variant="ghost" 
-                size="icon"
-                onClick={() => setIsMobileOpen(false)}
-                className="rounded-full h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary shrink-0 cursor-pointer"
-                aria-label="Close Menu"
-              >
-                <X size={18} />
-              </Button>
+              <div className="min-w-0">
+                <h2 className="text-sm font-extrabold leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 truncate">
+                  {t('brandName')}
+                </h2>
+                <p className="text-[10px] text-muted-foreground font-medium truncate">
+                  {t('brandSubtitle')}
+                </p>
+              </div>
             </div>
 
-            {/* Mobile Navigation Links */}
-            <nav className="flex-1 overflow-y-auto p-3">
-              <ul className="space-y-1.5">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <li key={`mobile-${item.id}`}>
-                      <Button
-                        variant={isActive ? "secondary" : "ghost"}
-                        onClick={() => handleNavClick(item.id)}
-                        className={cn(
-                          "w-full h-12 relative overflow-hidden transition-all group rounded-xl flex items-center justify-between px-3.5 cursor-pointer",
-                          isActive 
-                            ? "bg-primary/10 text-primary font-bold shadow-xs" 
-                            : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground font-medium"
-                        )}
-                      >
-                        {isActive && (
-                          <div className="absolute left-0 top-[15%] bottom-[15%] w-1 bg-primary rounded-r-md" />
-                        )}
-                        
-                        <div className="flex items-center min-w-0 flex-1">
-                          <Icon 
-                            size={20} 
-                            className={cn(
-                              "shrink-0 transition-transform mr-3",
-                              isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-foreground"
-                            )} 
-                          />
-                          <span className="text-left text-sm font-semibold truncate">
-                            {item.label}
-                          </span>
-                        </div>
-                        
-                        {item.badge && (
-                          <span 
-                            className={cn(
-                              "shrink-0 text-[9px] px-2 py-0.5 rounded-md tracking-wider uppercase font-bold ml-2",
-                              item.badgeStyle
-                            )}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </Button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+            <Button 
+              id="mobile-menu-close-btn"
+              variant="ghost" 
+              size="icon"
+              onClick={() => setIsMobileOpen(false)}
+              className="rounded-full h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary shrink-0 cursor-pointer"
+              aria-label="Close Menu"
+            >
+              <X size={18} />
+            </Button>
+          </div>
 
-            {/* Mobile Settings Footer */}
-            <div className="p-3 border-t border-border bg-secondary/20">
-              <Button
-                variant="ghost"
-                onClick={handleOpenSettings}
-                className="w-full h-11 text-muted-foreground hover:bg-secondary hover:text-foreground rounded-xl flex items-center justify-start px-3.5 cursor-pointer"
-              >
-                <Settings size={18} className="mr-3 shrink-0" />
-                <span className="text-sm font-medium">{t('aiSettings')}</span>
-              </Button>
-            </div>
-          </aside>
-        </div>
-      )}
+          {/* Mobile Navigation Links */}
+          <nav className="flex-1 overflow-y-auto p-3">
+            <ul className="space-y-1.5">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <li key={`mobile-${item.id}`}>
+                    <Button
+                      variant={isActive ? "secondary" : "ghost"}
+                      onClick={() => handleNavClick(item.id)}
+                      className={cn(
+                        "w-full h-12 relative overflow-hidden transition-all group rounded-xl flex items-center justify-between px-3.5 cursor-pointer",
+                        isActive 
+                          ? "bg-primary/10 text-primary font-bold shadow-xs" 
+                          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground font-medium"
+                      )}
+                    >
+                      {isActive && (
+                        <div className="absolute left-0 top-[15%] bottom-[15%] w-1 bg-primary rounded-r-md" />
+                      )}
+                      
+                      <div className="flex items-center min-w-0 flex-1">
+                        <Icon 
+                          size={20} 
+                          className={cn(
+                            "shrink-0 transition-transform mr-3",
+                            isActive ? "text-primary scale-110" : "text-muted-foreground group-hover:text-foreground"
+                          )} 
+                        />
+                        <span className="text-left text-sm font-semibold truncate">
+                          {item.label}
+                        </span>
+                      </div>
+                      
+                      {item.badge && (
+                        <span 
+                          className={cn(
+                            "shrink-0 text-[9px] px-2 py-0.5 rounded-md tracking-wider uppercase font-bold ml-2",
+                            item.badgeStyle
+                          )}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Mobile Settings Footer */}
+          <div className="p-3 border-t border-border bg-secondary/20">
+            <Button
+              variant="ghost"
+              onClick={handleOpenSettings}
+              className="w-full h-11 text-muted-foreground hover:bg-secondary hover:text-foreground rounded-xl flex items-center justify-start px-3.5 cursor-pointer"
+            >
+              <Settings size={18} className="mr-3 shrink-0" />
+              <span className="text-sm font-medium">{t('aiSettings')}</span>
+            </Button>
+          </div>
+        </aside>
+      </div>
 
       {/* ========================================================================= */}
       {/* 2. DESKTOP PERMANENT SIDEBAR (Hidden on < 768px, visible on md+ screens)   */}
