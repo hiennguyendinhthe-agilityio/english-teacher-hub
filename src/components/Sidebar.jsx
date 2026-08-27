@@ -10,7 +10,8 @@ import {
   ChevronRight,
   FolderOpen,
   UploadCloud,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ export default function Sidebar({
       badge: 'HOT',
       badgeStyle: 'bg-gradient-to-r from-rose-500 to-amber-500 text-white font-extrabold shadow-xs' 
     },
+    { id: 'teacherPlanner', label: t('navPlanner'), icon: Calendar },
     { 
       id: 'flashcard', 
       label: t('navFlashcard'), 

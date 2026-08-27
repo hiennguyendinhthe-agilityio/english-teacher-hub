@@ -21,6 +21,7 @@ export const translations = {
 
     // ── Sidebar Navigation (Concise & Professional Copy) ──
     navDashboard: "Bảng Điều Khiển",
+    navPlanner: "Sổ Tay",
     navCourses: "Khóa Học (Units)",
     navFlashcard: "Flashcard 3D",
     navWorksheet: "Luyện Đề & Quiz",
@@ -341,6 +342,15 @@ export const translations = {
     splashSubtitle: "Nền Tảng Dạy & Học Tiếng Anh Thông Minh",
     splashSkip: "Chạm để vào nhanh",
     splashLoading: "Đang chuẩn bị bài học...",
+
+    // ── Planner Auth ──
+    errNoConnection: "Không thể kết nối đến server Python.",
+    errLoginFail: "Đăng nhập thất bại. Kiểm tra lại tài khoản.",
+    errUsernameTaken: "Tên đăng nhập đã có người sử dụng. Vui lòng chọn tên khác!",
+    errRegisterFail: "Đăng ký thất bại. Vui lòng thử lại sau.",
+    successRegister: "Đăng ký thành công! Vui lòng Đăng nhập.",
+    defaultLoginErr: "Lỗi đăng nhập",
+    defaultRegErr: "Lỗi đăng ký",
   },
 
   en: {
@@ -355,6 +365,7 @@ export const translations = {
 
     // ── Sidebar Navigation (Concise & Professional Copy) ──
     navDashboard: "Dashboard",
+    navPlanner: "Planner",
     navCourses: "Units & Lessons",
     navFlashcard: "Flashcard 3D",
     navWorksheet: "Practice & Quizzes",
@@ -674,6 +685,15 @@ export const translations = {
     splashSubtitle: "Interactive AI Learning & Teaching Hub",
     splashSkip: "Tap anywhere to skip",
     splashLoading: "Loading interactive lessons...",
+
+    // ── Planner Auth ──
+    errNoConnection: "Cannot connect to Python server.",
+    errLoginFail: "Login failed. Please check your credentials.",
+    errUsernameTaken: "Username is already taken. Please choose another one!",
+    errRegisterFail: "Registration failed. Please try again later.",
+    successRegister: "Registration successful! Please login.",
+    defaultLoginErr: "Login error",
+    defaultRegErr: "Registration error",
   }
 };
 

@@ -18,3 +18,6 @@ These rules enforce strict localization requirements. The platform MUST be perfe
 
 ## 4. Bilingual Verification
 - Always verify and test both `English` and `Tiếng Việt` language states before finalizing any implementation. Check for text overflow when switching between languages, as translated strings may vary significantly in length.
+
+## 5. No Hardcoded Strings in Commits (Git Rule)
+- **CRITICAL:** Before performing any `git commit` or `git push`, you MUST ensure that no new `.js`, `.jsx`, or `.ts` files contain hardcoded Vietnamese strings. All Vietnamese text must be safely stored inside `i18n.js`. Any violation of this rule during a code push is considered a critical failure.

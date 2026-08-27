@@ -17,6 +17,7 @@ const WorksheetGenerator = lazy(() => import('./components/WorksheetGenerator'))
 const EssayGrader = lazy(() => import('./components/EssayGrader'));
 const AIImporter = lazy(() => import('./components/AIImporter'));
 const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
+const TeacherPlanner = lazy(() => import('./components/TeacherPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import AIChatBot from './components/AIChatBot';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -72,6 +73,12 @@ function AppLayout() {
         return (
           <Suspense fallback={<LoadingSkeleton variant="grid" />}>
             <CourseManager setActiveTab={setActiveTab} />
+          </Suspense>
+        );
+      case 'teacherPlanner':
+        return (
+          <Suspense fallback={<LoadingSkeleton variant="split" />}>
+            <TeacherPlanner />
           </Suspense>
         );
       case 'flashcard':
