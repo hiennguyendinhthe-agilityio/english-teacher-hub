@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ms-van-english-v1';
+const CACHE_NAME = 'ms-van-english-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

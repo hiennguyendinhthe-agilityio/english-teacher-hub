@@ -14,7 +14,7 @@ export const plannerService = {
     formData.append('password', password);
     
     // Thử gọi /auth/login (chuẩn RESTful mà Thầy/Cô đang code trong app.main)
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://english-teacher-hub.onrender.com/api/v1';
 
     let response;
     try {
@@ -87,7 +87,7 @@ export const plannerService = {
     };
     
     // Gọi trực tiếp fetch vì endpoint này không cần Token Authorization
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://english-teacher-hub.onrender.com/api/v1';
     const response = await fetch(`${baseUrl}/auth/register`, {
       method: 'POST',
       headers: {

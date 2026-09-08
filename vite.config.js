@@ -7,6 +7,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
+  define: {
+    // ponytail: hardcoded for production since .env.* is gitignored
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(
+      process.env.VITE_API_BASE_URL || 'https://english-teacher-hub.onrender.com/api/v1'
+    ),
+  },
   plugins: [react()],
   resolve: {
     alias: {

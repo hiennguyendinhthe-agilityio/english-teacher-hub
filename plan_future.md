@@ -20,9 +20,8 @@ Tài liệu này đóng vai trò như một chiếc **"La Bàn"**, giúp Thầy/
 
 - [x] **Background Tasks:** Gửi email hoặc xử lý báo cáo chạy ngầm không làm đơ giao diện.
 - [x] **WebSockets (Thời gian thực):** Đồng bộ hóa dữ liệu 2 máy tính ngay lập tức không cần F5.
-- [ ] **Advanced Documentation (Chapter 10):** Biến trang Swagger thành bản tài liệu chuyên nghiệp (có logo, phân chia thư mục API).
-- [ ] **Unit Testing (Chapter 9):** Viết kịch bản test tự động để đảm bảo code không bao giờ lỗi khi có tính năng mới.
-
+- [ ] **Monitoring & Best Practices (Chapter 9):** Cấu hình Logging chuyên nghiệp, đo lường hiệu năng API (Middleware) và cấu trúc Clean Architecture.
+- [ ] **Documentation & Developer Experience (Chapter 10):** Tối ưu Swagger UI/ReDoc, quản lý biến môi trường (Environment Variables) và làm Bài tập tổng hợp (Exercise 3).
 ---
 
 ## 🏗️ GIAI ĐOẠN 3: NÂNG CẤP KIẾN TRÚC (TRƯỚC KHI LÊN MẠNG)
