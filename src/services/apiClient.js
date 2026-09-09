@@ -79,6 +79,16 @@ class ApiClient {
       return await response.json();
     } catch (error) {
       console.error(`[API Client Error] ${options.method || 'GET'} ${endpoint}:`, error.message);
+      
+      // Bắn tín hiệu toàn cục nếu là lỗi mạng (Mất mạng, Server sập)
+      if (error.name === "TypeError" || error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+          if (typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("network_error", { 
+                  detail: { message: "Hệ thống đang bảo trì hoặc mất kết nối mạng. Vui lòng thử lại sau giây lát!" }
+              }));
+          }
+      }
+      
       throw error;
     }
   }

@@ -20,7 +20,22 @@ const LessonPlanner = lazy(() => import('./components/LessonPlanner'));
 const TeacherPlanner = lazy(() => import('./components/TeacherPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import AIChatBot from './components/AIChatBot';
-import PWAInstallPrompt from './components/PWAInstallPrompt';
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import { AlertCircle, X } from "lucide-react";
+
+function NetworkErrorToast({ message, onClose }) {
+  if (!message) return null;
+  return (
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-red-600 text-white px-4 py-3 rounded-lg shadow-xl animate-in slide-in-from-top-5 fade-in duration-300">
+      <AlertCircle className="w-5 h-5 shrink-0" />
+      <span className="text-sm font-medium">{message}</span>
+      <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-md transition-colors ml-2">
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
 
 function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -28,7 +43,18 @@ function AppLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [networkErrorMsg, setNetworkErrorMsg] = useState("");
   const mainScrollRef = useRef(null);
+
+  useEffect(() => {
+    const handleNetworkError = (e) => {
+      setNetworkErrorMsg(e.detail?.message || "Lỗi kết nối");
+      // Tự động tắt sau 5 giây
+      setTimeout(() => setNetworkErrorMsg(""), 5000);
+    };
+    window.addEventListener("network_error", handleNetworkError);
+    return () => window.removeEventListener("network_error", handleNetworkError);
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -38,19 +64,7 @@ function AppLayout() {
     }
   }, [isDarkMode]);
 
-  // Smoothly dissolve the persistent native splash screen once React is mounted
-  useEffect(() => {
-    const splash = document.getElementById('app-splash');
-    if (splash) {
-      const timer = setTimeout(() => {
-        splash.classList.add('splash-fade-out');
-        setTimeout(() => {
-          splash.style.display = 'none';
-        }, 450);
-      }, 700);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  // Splash screen is now handled at the App root level — removed from AppLayout
 
   // Auto scroll main container to top whenever active tab changes
   useEffect(() => {
@@ -157,11 +171,28 @@ function AppLayout() {
 
       {/* PWA Mobile App Install Prompt Banner */}
       <PWAInstallPrompt />
+
+      {/* Network Error Toast */}
+      <NetworkErrorToast message={networkErrorMsg} onClose={() => setNetworkErrorMsg("")} />
     </div>
   );
 }
 
 export default function App() {
+  // Tắt Splash Screen ở root level — áp dụng cho TẤT CẢ routes (/, /login, /admin)
+  useEffect(() => {
+    const splash = document.getElementById('app-splash');
+    if (splash) {
+      const timer = setTimeout(() => {
+        splash.classList.add('splash-fade-out');
+        setTimeout(() => {
+          splash.style.display = 'none';
+        }, 450);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <LanguageProvider>
       <AuthProvider>
