@@ -183,5 +183,30 @@
     <!-- React Root -->
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Emergency Splash Killer: Pure vanilla JS fallback.
+         Removes splash after 2.5s regardless of React state.
+         This is a safety net for non-root routes (/login, /admin). -->
+    <script>
+      (function() {
+        function killSplash() {
+          var s = document.getElementById('app-splash');
+          if (s) {
+            s.classList.add('splash-fade-out');
+            setTimeout(function() { s.style.display = 'none'; }, 500);
+          }
+        }
+        // Kill splash as soon as DOM is ready (fastest possible)
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(killSplash, 800);
+          });
+        } else {
+          setTimeout(killSplash, 800);
+        }
+        // Hard kill at 3s — no excuses, splash MUST die
+        setTimeout(killSplash, 3000);
+      })();
+    </script>
   </body>
 </html>
