@@ -162,37 +162,28 @@
   </head>
   <body>
 
-    <!-- SYNCHRONOUS splash killer — runs before ALL other JS, cannot be blocked -->
+    <!-- SYNCHRONOUS splash killer — polls every 300ms until splash is gone -->
     <script>
       (function() {
         function killSplash() {
           var s = document.getElementById('app-splash');
-          if (!s) return;
-          s.style.transition = 'opacity 0.3s ease';
+          if (!s) return true; // already gone
+          s.style.transition = 'none';
           s.style.opacity = '0';
+          s.style.display = 'none';
           s.style.pointerEvents = 'none';
-          setTimeout(function() { s.style.display = 'none'; }, 350);
+          if (s.parentNode) s.parentNode.removeChild(s);
+          return true;
         }
-        // Polling approach — kills splash every 200ms starting at 500ms
-        // Works regardless of SW cache, React load state, or Clerk status
-        var fired = false;
-        function tryKill() {
-          if (fired) return;
-          fired = true;
-          killSplash();
-        }
-        setTimeout(tryKill, 500);
-        setTimeout(tryKill, 1000);
-        setTimeout(tryKill, 2000);
-        setTimeout(tryKill, 3000);
-        // Also kill immediately if DOMContentLoaded already fired
-        if (document.readyState !== 'loading') {
-          setTimeout(tryKill, 100);
-        } else {
-          document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(tryKill, 500);
-          });
-        }
+        // Poll every 300ms — keep retrying until element is actually removed
+        var interval = setInterval(function() {
+          var done = killSplash();
+          if (done) clearInterval(interval);
+        }, 300);
+        // Safety: stop polling after 8 seconds no matter what
+        setTimeout(function() { clearInterval(interval); }, 8000);
+        // First attempt immediately
+        killSplash();
       })();
     </script>
 
