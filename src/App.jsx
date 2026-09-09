@@ -180,17 +180,17 @@ function AppLayout() {
 
 export default function App() {
   // Tắt Splash Screen ở root level — áp dụng cho TẤT CẢ routes (/, /login, /admin)
+  // Dùng 200ms thay vì 700ms để ép splash tắt sớm hơn
   useEffect(() => {
     const splash = document.getElementById('app-splash');
-    if (splash) {
-      const timer = setTimeout(() => {
-        splash.classList.add('splash-fade-out');
-        setTimeout(() => {
-          splash.style.display = 'none';
-        }, 450);
-      }, 700);
-      return () => clearTimeout(timer);
-    }
+    if (!splash) return;
+
+    // Add fade-out immediately
+    splash.classList.add('splash-fade-out');
+    const timer = setTimeout(() => {
+      splash.style.display = 'none';
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
