@@ -162,6 +162,40 @@
   </head>
   <body>
 
+    <!-- SYNCHRONOUS splash killer — runs before ALL other JS, cannot be blocked -->
+    <script>
+      (function() {
+        function killSplash() {
+          var s = document.getElementById('app-splash');
+          if (!s) return;
+          s.style.transition = 'opacity 0.3s ease';
+          s.style.opacity = '0';
+          s.style.pointerEvents = 'none';
+          setTimeout(function() { s.style.display = 'none'; }, 350);
+        }
+        // Polling approach — kills splash every 200ms starting at 500ms
+        // Works regardless of SW cache, React load state, or Clerk status
+        var fired = false;
+        function tryKill() {
+          if (fired) return;
+          fired = true;
+          killSplash();
+        }
+        setTimeout(tryKill, 500);
+        setTimeout(tryKill, 1000);
+        setTimeout(tryKill, 2000);
+        setTimeout(tryKill, 3000);
+        // Also kill immediately if DOMContentLoaded already fired
+        if (document.readyState !== 'loading') {
+          setTimeout(tryKill, 100);
+        } else {
+          document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(tryKill, 500);
+          });
+        }
+      })();
+    </script>
+
     <!-- Persistent Zero-Flicker Native Splash Overlay -->
     <div id="app-splash">
       <div class="app-splash-icon-wrap">
