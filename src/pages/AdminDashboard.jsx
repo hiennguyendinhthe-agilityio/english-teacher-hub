@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { useLanguage } from '../context/LanguageContext';
 import { collection, getDocs, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -9,7 +9,9 @@ import CourseEditor from '../components/CourseEditor';
 import InteractiveLesson from '../components/InteractiveLesson';
 
 export default function AdminDashboard() {
-  const { currentUser, logout } = useAuth();
+  const { signOut } = useAuth();
+  const { user: currentUser } = useUser();
+  const logout = () => signOut();
   const { t } = useLanguage();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);

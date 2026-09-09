@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
@@ -195,8 +194,7 @@ export default function App() {
 
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <BrowserRouter>
+      <BrowserRouter>
           <Routes>
             <Route path="/" element={<AppLayout />} />
             <Route path="/login" element={<Login />} />
@@ -206,8 +204,7 @@ export default function App() {
               </ProtectedRoute>
             } />
           </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      </BrowserRouter>
     </LanguageProvider>
   );
 }
