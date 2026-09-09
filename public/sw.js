@@ -1,4 +1,6 @@
-const CACHE_NAME = 'ms-van-english-v3';
+// Service Worker v5 - Nuclear cache clear
+// This version clears ALL old caches and re-caches fresh content
+const CACHE_NAME = 'ms-van-english-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,7 +10,6 @@ const STATIC_ASSETS = [
   '/icon-512.png'
 ];
 
-// Install Event: Pre-cache shell assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -17,33 +18,43 @@ self.addEventListener('install', (event) => {
       });
     })
   );
+  // Immediately take control — don't wait for old tabs to close
   self.skipWaiting();
 });
 
-// Activate Event: Clean up outdated caches
+// Activate Event: Wipe ALL old caches — force fresh content on every deploy
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
+          .map((name) => {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
+      )
+    ).then(() => {
+      // Take control of all open tabs immediately
+      return self.clients.claim();
+    }).then(() => {
+      // Tell all clients to reload to get fresh content
+      return self.clients.matchAll({ type: 'window' }).then((clients) => {
+        clients.forEach((client) => client.navigate(client.url));
+      });
     })
   );
-  self.clients.claim();
 });
 
-// Fetch Event: Network-first for dynamic navigation, Cache-first for static assets
+// Fetch Event: Network-first for ALL requests — no stale cache issues
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
-  // Don't intercept non-GET requests or browser-extension schemes
   if (request.method !== 'GET' || !request.url.startsWith('http')) {
     return;
   }
 
-  // For HTML navigation requests: Network first with Cache fallback
+  // For HTML navigation: always go to network first
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -54,33 +65,22 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html') || caches.match('/'))
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
 
-  // For static assets (JS, CSS, Images, Fonts): Cache first, background refresh
+  // For static assets (JS, CSS, fonts): Network first, cache as fallback
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch in background to keep cache fresh
-        fetch(request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
-            }
-          })
-          .catch(() => {});
-        return cachedResponse;
-      }
-
-      return fetch(request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && (request.url.includes('/assets/') || request.url.includes('fonts.'))) {
+    fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 &&
+            (request.url.includes('/assets/') || request.url.includes('fonts.'))) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
         }
         return networkResponse;
-      });
-    })
+      })
+      .catch(() => caches.match(request))
   );
 });
