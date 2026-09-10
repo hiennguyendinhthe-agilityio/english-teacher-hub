@@ -1,59 +1,59 @@
-# 🐍 Giáo Trình Thực Chiến: Xây Dựng AI Chatbot Backend Với Python & FastAPI
+# 🐍 Practical Guide: Building an AI Chatbot Backend with Python & FastAPI
 
-Chào mừng Thầy/Cô đến với tài liệu hướng dẫn chuyên sâu về **Python & FastAPI** được đúc kết trực tiếp từ mã nguồn thực tế của dự án **Ms Van's English Class**! 
+Welcome to the in-depth tutorial on **Python & FastAPI**, drawn directly from the real-world source code of the **Ms Van's English Class** project!
 
-Tài liệu này được biên soạn theo lộ trình dễ hiểu, từ nền tảng đến thực chiến, giúp Thầy/Cô nắm vững tư duy xây dựng Backend hiện đại.
-
----
-
-## 📑 Mục Lục
-1. [FastAPI là gì và tại sao nên học FastAPI?](#1-fastapi-là-gì-và-tại-sao-nên-học-fastapi)
-2. [Cấu trúc cốt lõi của một dự án FastAPI](#2-cấu-trúc-cốt-lõi-của-một-dự-án-fastapi)
-3. [Giải phẫu chi tiết mã nguồn `api/index.py`](#3-giải-phẫu-chi-tiết-mã-nguồn-apiindexpy)
-4. [Kỹ thuật xử lý NLP & Nhận diện ý định (Intent Engine) bằng Python](#4-kỹ-thuật-xử-lý-nlp--nhận-diện-ý-định-intent-engine-bằng-python)
-5. [Hướng dẫn chạy & Debug Local với Swagger UI tự động](#5-hướng-dẫn-chạy--debug-local-với-swagger-ui-tự-động)
-6. [Bài tập thực hành nâng cao tay nghề](#6-bài-tập-thực-hành-nâng-cao-tay-nghề)
+This document is crafted as a straightforward learning path, from basics to practical application, helping you master the mindset of modern Backend development.
 
 ---
 
-## 1. FastAPI Là Gì Và Tại Sao Nên Học FastAPI?
-
-Trong thế giới Python Backend, có 3 framework nổi tiếng nhất:
-- **Django**: Đồ sộ, tích hợp sẵn mọi thứ (phù hợp website monolithic truyền thống).
-- **Flask**: Nhẹ, linh hoạt nhưng cũ và không hỗ trợ `async/await` gốc.
-- **FastAPI (Hiện đại nhất 🌟)**: Framework tốc độ cao nhất hiện nay của Python, được các công ty AI hàng đầu (OpenAI, Microsoft, Uber, Netflix) tin dùng.
-
-### Ưu điểm vượt trội của FastAPI:
-- ⚡ **Tốc độ cực nhanh (High Performance)**: Ngang ngửa NodeJS và Go nhờ chạy trên nền tảng `Starlette` và `Pydantic`.
-- 🛡️ **Tự động kiểm tra kiểu dữ liệu (Type Safety)**: Báo lỗi ngay lập tức nếu Client gửi sai định dạng JSON.
-- 📖 **Tự động sinh tài liệu API (Interactive Docs)**: Tự tạo trang web Swagger UI (`/docs`) để test API bằng 1 click mà không cần cài Postman.
-- 🔀 **Hỗ trợ lập trình bất đồng bộ (`async / await`)**: Xử lý hàng ngàn kết nối cùng lúc mà không bị nghẽn mạng.
+## 📑 Table of Contents
+1. [What is FastAPI and why should you learn it?](#1-what-is-fastapi-and-why-should-you-learn-it)
+2. [Core structure of a FastAPI project](#2-core-structure-of-a-fastapi-project)
+3. [Detailed source code anatomy of `api/index.py`](#3-detailed-source-code-anatomy-of-apiindexpy)
+4. [NLP Techniques & Intent Routing Engine in Python](#4-nlp-techniques--intent-routing-engine-in-python)
+5. [Running & Debugging Locally with Automated Swagger UI](#5-running--debugging-locally-with-automated-swagger-ui)
+6. [Advanced Practical Exercises](#6-advanced-practical-exercises)
 
 ---
 
-## 2. Cấu Trúc Cốt Lõi Của Một Dự Án FastAPI
+## 1. What is FastAPI and Why Should You Learn It?
 
-Một API FastAPI chuẩn chỉnh luôn bao gồm 4 thành phần chính:
+In the Python Backend ecosystem, there are 3 most famous frameworks:
+- **Django**: Massive, batteries-included (suitable for traditional monolithic websites).
+- **Flask**: Lightweight, flexible but older and lacks native `async/await` support.
+- **FastAPI (The most modern 🌟)**: Currently the fastest Python framework, trusted by top AI companies (OpenAI, Microsoft, Uber, Netflix).
 
+### Outstanding advantages of FastAPI:
+- ⚡ **High Performance**: On par with NodeJS and Go, powered by `Starlette` and `Pydantic`.
+- 🛡️ **Type Safety**: Instantly throws an error if the Client sends malformed JSON data.
+- 📖 **Interactive API Docs**: Automatically generates a Swagger UI (`/docs`) page for 1-click API testing without installing Postman.
+- 🔀 **Asynchronous Support (`async / await`)**: Handles thousands of concurrent connections without blocking the network.
+
+---
+
+## 2. Core Structure of a FastAPI Project
+
+A standard FastAPI always consists of 4 main components:
+
+```text
++-------------------------------------------------------------+
+| 1. App Initialization: app = FastAPI()                      |
++-------------------------------------------------------------+
+| 2. Middleware Config (CORS - allows React to call it)       |
++-------------------------------------------------------------+
+| 3. Define Schemas (Pydantic BaseModel)                      |
++-------------------------------------------------------------+
+| 4. Build Routes / Endpoints (@app.get, @app.post)           |
++-------------------------------------------------------------+
 ```
-+-------------------------------------------------------------+
-| 1. Khởi tạo App: app = FastAPI()                            |
-+-------------------------------------------------------------+
-| 2. Cấu hình Middleware (CORS - cho phép React gọi sang)     |
-+-------------------------------------------------------------+
-| 3. Định nghĩa Schemas (Pydantic BaseModel)                  |
-+-------------------------------------------------------------+
-| 4. Xây dựng các Routes / Endpoints (@app.get, @app.post)    |
-+-------------------------------------------------------------+
-```
 
 ---
 
-## 3. Giải Phẫu Chi Tiết Mã Nguồn `api/index.py`
+## 3. Detailed Source Code Anatomy of `api/index.py`
 
-Hãy cùng phân tích từng dòng code trong file Backend của chúng ta:
+Let's break down each line of code in our Backend file:
 
-### Bước 1: Khởi tạo và Cấu hình CORS
+### Step 1: Initialization and CORS Configuration
 ```python
 import os
 import re
@@ -64,16 +64,16 @@ from typing import List
 import httpx
 from dotenv import load_dotenv
 
-# Đọc các biến bí mật từ file .env (như GEMINI_API_KEY)
+# Load secret variables from .env file (like GEMINI_API_KEY)
 load_dotenv()
 
 app = FastAPI(title="Ms Van's English Class AI Backend")
 
-# CORS (Cross-Origin Resource Sharing): Cho phép Frontend (React chạy ở localhost:5173 
-# hoặc domain Vercel) có quyền gửi dữ liệu sang Backend này
+# CORS (Cross-Origin Resource Sharing): Allows Frontend (React running at localhost:5173 
+# or Vercel domain) permission to send data to this Backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Cho phép tất cả các nguồn truy cập an toàn
+    allow_origins=["*"], # Allow all origins securely
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -82,115 +82,115 @@ app.add_middleware(
 
 ---
 
-### Bước 2: Định nghĩa Kiểu Dữ Liệu Với Pydantic (`BaseModel`)
-Pydantic giúp ép kiểu và kiểm tra tính hợp lệ của dữ liệu trước khi code thực thi:
+### Step 2: Define Data Types with Pydantic (`BaseModel`)
+Pydantic helps cast types and validate data before the code executes:
 
 ```python
 class ChatMessage(BaseModel):
-    role: str  # Bắt buộc phải là chuỗi (VD: "user" hoặc "ai")
-    text: str  # Bắt buộc là nội dung tin nhắn
+    role: str  # Must be a string (E.g.: "user" or "ai")
+    text: str  # Must be the message content
 
 class ChatRequest(BaseModel):
-    history: List[ChatMessage] = [] # Danh sách các tin nhắn trước đó (mặc định là rỗng)
-    message: str                    # Tin nhắn mới mà người dùng vừa gõ
+    history: List[ChatMessage] = [] # List of previous messages (defaults to empty)
+    message: str                    # New message just typed by the user
 ```
-> **Tại sao điều này quan trọng?** Nếu ai đó gửi lên dữ liệu thiếu trường `message` hoặc gửi số thay vì chuỗi, FastAPI sẽ tự động trả về lỗi `422 Unprocessable Entity` rõ ràng mà server không bao giờ bị sập!
+> **Why is this important?** If someone sends data missing the `message` field or sends a number instead of a string, FastAPI will automatically return a clear `422 Unprocessable Entity` error, and the server will never crash!
 
 ---
 
-### Bước 3: Viết Endpoint Tiếp Nhận Tin Nhắn (`@app.post("/api/chat")`)
+### Step 3: Write the Endpoint to Receive Messages (`@app.post("/api/chat")`)
 ```python
 @app.post("/api/chat")
 async def chat_with_ai(request: ChatRequest):
     user_msg = request.message.strip()
     
-    # Bắt lỗi nếu người dùng gửi chuỗi rỗng
+    # Catch error if the user sends an empty string
     if not user_msg:
-        raise HTTPException(status_code=400, detail="Nội dung tin nhắn không được để trống")
+        raise HTTPException(status_code=400, detail="Message content cannot be empty")
 
-    # Xử lý thông minh và trả về kết quả JSON
+    # Smart processing and return JSON result
     smart_reply = generate_smart_response(user_msg)
     return {"reply": smart_reply}
 ```
-- Từ khóa `async def`: Cho biết đây là hàm bất đồng bộ (Asynchronous), giúp máy chủ không bị "đơ" khi đang xử lý tác vụ nặng.
-- `HTTPException`: Công cụ chuẩn của FastAPI để trả về các mã lỗi HTTP (400: Bad Request, 404: Not Found, 500: Server Error).
+- `async def` keyword: Indicates this is an Asynchronous function, preventing the server from "freezing" during heavy tasks.
+- `HTTPException`: FastAPI's standard tool to return HTTP error codes (400: Bad Request, 404: Not Found, 500: Server Error).
 
 ---
 
-## 4. Kỹ Thuật Xử Lý NLP & Nhận Diện Ý Định (Intent Engine) Bằng Python
+## 4. NLP Techniques & Intent Routing Engine in Python
 
-Trong hàm `generate_smart_response`, chúng ta áp dụng các kỹ thuật xử lý ngôn ngữ tự nhiên (NLP) cơ bản nhưng cực kỳ mạnh mẽ:
+In the `generate_smart_response` function, we apply basic but incredibly powerful Natural Language Processing (NLP) techniques:
 
-### 1. Chuẩn hóa chuỗi (Text Normalization)
+### 1. Text Normalization
 ```python
 def normalize_text(text: str) -> str:
-    # Chuyển về chữ thường và gom nhiều khoảng trắng liên tiếp thành 1 khoảng trắng
+    # Convert to lowercase and compress multiple consecutive spaces into 1 space
     return re.sub(r'\s+', ' ', text.strip().lower())
 ```
 
-### 2. Sử dụng Biểu thức chính quy (Regular Expression - Regex)
-Thay vì dùng `if "chào" in msg` (dễ bị bắt nhầm vào các từ như "chảo", "chao"), chúng ta dùng ranh giới từ `(^|[^\wÀ-ỹ])` để bắt chính xác từng từ độc lập kể cả tiếng Việt có dấu:
+### 2. Using Regular Expressions (Regex)
+Instead of using `if "hi" in msg` (which might accidentally catch words like "chip", "hide"), we use word boundaries `(^|[^\wÀ-ỹ])` to accurately catch individual words, even Vietnamese with diacritics:
 
 ```python
 greeting_words = ['xin chào', 'chào bạn', 'chào cô', 'chào', 'hello', 'hi']
 has_greeting = any(re.search(rf'(^|[^\wÀ-ỹ]){re.escape(w)}([^\wÀ-ỹ]|$)', msg, re.IGNORECASE) for w in greeting_words)
 ```
 
-### 3. Bộ lọc phân luồng ý định (Intent Routing)
-- **Học tập / Tính năng:** Nhận diện từ khóa `flashcard`, `soạn bài`, `unit 1`, `in pdf` -> Trả về hướng dẫn tính năng tương ứng.
-- **Ngữ pháp:** Nhận diện `hiện tại đơn`, `a và an`, `so sánh hơn` -> Trả về công thức và ví dụ dễ hiểu.
-- **Ngoài lề (Off-topic):** Nhận diện `thời tiết`, `toán`, `code`, `bóng đá` -> Khéo léo từ chối và điều hướng người dùng quay lại học tiếng Anh.
+### 3. Intent Routing Filter
+- **Learning / Features:** Detects keywords like `flashcard`, `prepare lesson`, `unit 1`, `print pdf` -> Returns corresponding feature guide.
+- **Grammar:** Detects `present simple`, `a and an`, `comparative` -> Returns easy-to-understand formulas and examples.
+- **Off-topic:** Detects `weather`, `math`, `code`, `football` -> Tactfully declines and navigates the user back to learning English.
 
 ---
 
-## 5. Hướng Dẫn Chạy & Debug Local Với Swagger UI Tự Động
+## 5. Running & Debugging Locally with Automated Swagger UI
 
-Thầy/Cô có thể tự tay khởi chạy máy chủ Python này trên máy tính của mình bất cứ lúc nào:
+You can manually start this Python server on your computer at any time:
 
-### Bước 1: Kích hoạt môi trường ảo (Virtual Environment)
-Mở Terminal tại thư mục dự án và gõ:
+### Step 1: Activate Virtual Environment
+Open Terminal at the project folder and type:
 ```bash
 source backend/venv/bin/activate
 ```
 
-### Bước 2: Chạy Server FastAPI với Uvicorn
+### Step 2: Run FastAPI Server with Uvicorn
 ```bash
 uvicorn api.index:app --reload --port 8000
 ```
-- `api.index:app`: Tìm file `index.py` trong thư mục `api/` và nạp biến `app`.
-- `--reload`: Tự động khởi động lại server mỗi khi Thầy/Cô bấm lưu (Ctrl+S / Cmd+S) code Python!
-- `--port 8000`: Mở cổng mạng số 8000.
+- `api.index:app`: Finds the `index.py` file in the `api/` directory and loads the `app` variable.
+- `--reload`: Automatically restarts the server every time you hit save (Ctrl+S / Cmd+S) in the Python code!
+- `--port 8000`: Opens network port 8000.
 
-### Bước 3: Trải nghiệm tính năng "ma thuật" - Swagger UI
-Khi server đang chạy, Thầy/Cô hãy mở trình duyệt web và truy cập vào đường dẫn:
+### Step 3: Experience the "Magic" - Swagger UI
+While the server is running, open your web browser and go to the link:
 👉 **`http://localhost:8000/docs`**
 
-Giao diện trực quan tuyệt đẹp sẽ hiện ra:
-1. Thầy/Cô sẽ thấy endpoint `POST /api/chat`.
-2. Bấm nút **Try it out**.
-3. Nhập tin nhắn thử: `{"message": "hướng dẫn học từ vựng bằng flashcard"}`.
-4. Bấm **Execute** và xem kết quả JSON trả về ngay tức thì!
+A beautifully visual interface will appear:
+1. You will see the `POST /api/chat` endpoint.
+2. Click the **Try it out** button.
+3. Enter a test message: `{"message": "guide me on learning vocabulary with flashcards"}`.
+4. Click **Execute** and see the JSON result returned instantly!
 
 ---
 
-## 6. Bài Tập Thực Hành Nâng Cao Tay Nghề 🎯
+## 6. Advanced Practical Exercises 🎯
 
-Để củng cố kiến thức vừa học, Thầy/Cô có thể thử tự tay thực hiện 2 bài tập nhỏ sau:
+To reinforce what you've learned, you can try doing these 2 small exercises yourself:
 
-### Bài tập 1: Thêm một câu chào mới cho Chatbot
-Thử mở file `api/index.py`, tìm mảng `greeting_words` và thêm các từ chào hỏi mới như `'good evening'`, `'chào buổi sáng'`. Sau đó thử test lại trên Swagger UI xem Bot có nhận diện được không!
+### Exercise 1: Add a new greeting for the Chatbot
+Try opening the `api/index.py` file, find the `greeting_words` array and add new greetings like `'good evening'`, `'good morning'`. Then test it again on Swagger UI to see if the Bot recognizes them!
 
-### Bài tập 2: Thêm một chủ đề ngữ pháp mới (Thì Quá khứ đơn)
-Thử viết thêm một khối `if` trong hàm `generate_smart_response`:
+### Exercise 2: Add a new grammar topic (Past Simple Tense)
+Try writing an additional `if` block in the `generate_smart_response` function:
 ```python
-if re.search(r'\b(quá khứ đơn|past simple|thì quá khứ)\b', msg):
+if re.search(r'\b(quá khứ đơn|past simple)\b', msg):
     return (
-        "💡 **Thì Quá Khứ Đơn (Past Simple):**\n\n"
-        "- Công thức: `S + V2/ed + O`\n"
-        "- Dùng để diễn tả hành động đã xảy ra và kết thúc trong quá khứ.\n"
-        "- Dấu hiệu: *yesterday, last week, 2 years ago, in 2020*."
+        "💡 **Past Simple Tense:**\n\n"
+        "- Formula: `S + V2/ed + O`\n"
+        "- Usage: Describes an action that occurred and finished in the past.\n"
+        "- Signals: *yesterday, last week, 2 years ago, in 2020*."
     )
 ```
 
 ---
-*Chúc Thầy/Cô học tập thật vui và nhanh chóng trở thành một Master Python & FastAPI thực thụ! Nếu có bất kỳ dòng code nào cần giải thích thêm, em luôn ở đây đồng hành cùng Thầy/Cô!* 🚀🐍
+*Happy learning, and may you quickly become a true Python & FastAPI Master! If any line of code needs further explanation, I am always here to guide you!* 🚀🐍
