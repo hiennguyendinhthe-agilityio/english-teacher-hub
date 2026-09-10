@@ -27,19 +27,19 @@ const SAMPLE_PRESETS_VI = [
     labelKey: 'impSample1',
     content: `Unit 6: COMMUNITY SERVICE & VOLUNTEERING
 VOCABULARY
-volunteer (n, v): người tình nguyện, làm tình nguyện
-donate (v): quyên góp, ủng hộ
-community service (n): dịch vụ công ích cộng đồng
-orphanage (n): trại trẻ mồ côi
-elderly people (n): người cao tuổi
-recycle (v): tái chế rác thải
-encourage (v): khuyến khích, động viên
+volunteer (n, v): volunteer
+donate (v): donate
+community service (n): community service
+orphanage (n): orphanage
+elderly people (n): elderly people
+recycle (v): recycle
+encourage (v): encourage
 
-GRAMMAR: The Past Simple Tense (Thì Quá Khứ Đơn)
-- Cách dùng: Diễn tả hành động đã xảy ra và kết thúc trong quá khứ.
-- Khẳng định (+): S + V2/ed (E.g., We collected warm clothes yesterday)
-- Phủ định (-): S + did not + V (base) (E.g., They didn't go to the shelter)
-- Nghi vấn (?): Did + S + V (base)? (E.g., Did you donate books?)
+GRAMMAR: The Past Simple Tense (Past Simple Tense)
+- Usage: Describes an action that occurred and finished in the past.
+- Affirmative (+): S + V2/ed (E.g., We collected warm clothes yesterday)
+- Negative (-): S + did not + V (base) (E.g., They didn't go to the shelter)
+- Interrogative (?): Did + S + V (base)? (E.g., Did you donate books?)
 
 PHONETICS: Sounds /t/, /d/, and /ɪd/ for past verb endings (-ed)
 - /t/ after voiceless sounds: helped, cooked
@@ -51,14 +51,14 @@ PHONETICS: Sounds /t/, /d/, and /ɪd/ for past verb endings (-ed)
     labelKey: 'impSample2',
     content: `Special Unit: ARTIFICIAL INTELLIGENCE & FUTURE TECH
 VOCABULARY
-artificial intelligence (n): trí tuệ nhân tạo (AI)
-automation (n): sự tự động hóa quy trình
-algorithm (n): thuật toán xử lý dữ liệu
-breakthrough (n): bước đột phá công nghệ
-innovative (adj): mang tính đổi mới sáng tạo
-transform (v): chuyển đổi, biến đổi mạnh mẽ
-virtual reality (n): thực tế ảo (VR)
-efficient (adj): đạt năng suất và hiệu quả cao
+artificial intelligence (n): artificial intelligence (AI)
+automation (n): process automation
+algorithm (n): data processing algorithm
+breakthrough (n): technological breakthrough
+innovative (adj): innovative
+transform (v): transform
+virtual reality (n): virtual reality (VR)
+efficient (adj): highly efficient and productive
 
 GRAMMAR: Future Possibility with MODAL VERBS (May / Might / Could)
 - Usage: Expressing future predictions and possibilities with different degrees of certainty.
@@ -70,14 +70,14 @@ GRAMMAR: Future Possibility with MODAL VERBS (May / Might / Could)
     labelKey: 'impSample3',
     content: `Mastery Unit: BUSINESS ENGLISH & JOB INTERVIEWS
 VOCABULARY
-candidate (n): ứng viên ứng tuyển
-qualification (n): bằng cấp, chứng chỉ chuyên môn
-interpersonal skills (n): kỹ năng giao tiếp ứng xử
-negotiate (v): đàm phán thương lượng
-responsibility (n): trách nhiệm công việc
-collaborate (v): phối hợp làm việc cùng nhau
-achieve (v): hoàn thành mục tiêu đặt ra
-professional (adj): có tác phong chuyên nghiệp
+candidate (n): candidate
+qualification (n): qualifications and certificates
+interpersonal skills (n): interpersonal communication skills
+negotiate (v): negotiate and bargain
+responsibility (n): job responsibility
+collaborate (v): collaborate and work together
+achieve (v): achieve set goals
+professional (adj): professional demeanor
 
 GRAMMAR: First Conditional with Modal Verbs in Business
 - Formula: If + S + Present Simple, S + can/should/must + V (base)
@@ -231,7 +231,7 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
         reader.onloadend = () => {
           const base64Data = reader.result.split(',')[1];
           setImporterParams({ 
-            text: "Phân tích tài liệu/hình ảnh đính kèm và tạo bài học chi tiết theo cấu trúc JSON.", 
+            text: "Analyze attached document/image and generate detailed lesson in JSON structure.", 
             files: [{ mimeType: file.type, data: base64Data }] 
           });
           setInputMode('paste');
@@ -239,7 +239,7 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
           soundFX.playFlip();
         };
         reader.onerror = () => {
-          setError('Không thể đọc file');
+          setError('Cannot read file');
           setIsReadingFile(false);
         };
         reader.readAsDataURL(file);
@@ -253,7 +253,7 @@ export default function AIImporter({ setActiveTab, onSaveLesson }) {
         soundFX.playFlip();
       }
     } catch (err) {
-      setError(err.message || 'Lỗi khi đọc file');
+      setError(err.message || 'Error reading file');
       setIsReadingFile(false);
       soundFX.playError();
     }

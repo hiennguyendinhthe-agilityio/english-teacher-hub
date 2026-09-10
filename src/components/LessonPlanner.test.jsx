@@ -46,8 +46,8 @@ describe('LessonPlanner Component', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/Mục Tiêu Bài Học/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Sẵn Sàng Cho Lớp Học/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Lesson Objectives/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Ready for Class/i).length).toBeGreaterThan(0);
     });
   });
 });

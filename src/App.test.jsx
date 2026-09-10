@@ -11,17 +11,17 @@ vi.mock('./context/AuthContext', () => ({
 describe('App Main Component with Lazy Loading & Suspense', () => {
   it('renders Dashboard by default with Student Hub branding', () => {
     render(<App />);
-    expect(screen.getByText(/Chinh Phục Tiếng Anh Từng Ngày/i)).toBeInTheDocument();
-    expect(screen.getByText(/Góc Học Tập & Luyện Thi/i)).toBeInTheDocument();
+    expect(screen.getByText(/Master English Step-by-Step/i)).toBeInTheDocument();
+    expect(screen.getByText(/Learning & Practice Hub/i)).toBeInTheDocument();
   });
 
   it('navigates to Course Manager tab when clicked and resolves lazy component', async () => {
     render(<App />);
-    const courseNavBtns = screen.getAllByText(/Khóa Học/i);
+    const courseNavBtns = screen.getAllByText(/Units & Lessons/i);
     fireEvent.click(courseNavBtns[0]);
 
     await waitFor(() => {
-      expect(screen.getByText(/Khám phá các Unit bài học tương tác/i)).toBeInTheDocument();
+      expect(screen.getByText(/Explore interactive Units/i)).toBeInTheDocument();
     });
   });
 
@@ -31,20 +31,20 @@ describe('App Main Component with Lazy Loading & Suspense', () => {
     fireEvent.click(flashcardNavBtns[0]);
 
     await waitFor(() => {
-      expect(screen.getByText(/Tạo Thẻ Từ Vựng & Flashcard 3D/i)).toBeInTheDocument();
+      expect(screen.getByText(/Create interactive, 3D flipping/i)).toBeInTheDocument();
     });
   });
 
   it('opens and closes settings modal with lazy loading', async () => {
     render(<App />);
-    const settingsBtns = screen.getAllByText(/Cài Đặt/i);
+    const settingsBtns = screen.getAllByText(/Settings/i);
     fireEvent.click(settingsBtns[0]);
 
     await waitFor(() => {
       expect(screen.getByText(/Google Gemini API Key/i)).toBeInTheDocument();
     });
 
-    const cancelBtn = screen.getByText(/Hủy Bỏ|Cancel/i);
+    const cancelBtn = screen.getByText(/Cancel/i);
     fireEvent.click(cancelBtn);
 
     await waitFor(() => {

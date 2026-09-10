@@ -43,13 +43,13 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bài học này không?")) {
+    if (window.confirm("Are you sure you want to delete this lesson?")) {
       try {
         await deleteDoc(doc(db, "courses", id));
         setCourses(courses.filter(c => c.id !== id));
       } catch (error) {
         console.error("Error deleting course:", error);
-        alert("Lỗi khi xóa bài học!");
+        alert("Error deleting lesson!");
       }
     }
   };
@@ -71,11 +71,11 @@ export default function AdminDashboard() {
   const handleSaveCourse = async (courseData) => {
     try {
       await setDoc(doc(db, "courses", courseData.id), courseData);
-      alert("✅ Lưu Khóa học thành công!");
+      alert("✅ Lesson saved successfully!");
       setActiveTab('courses');
     } catch (error) {
       console.error("Error saving course:", error);
-      alert("Lỗi khi lưu Khóa học!");
+      alert("Error saving lesson!");
     }
   };
 
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
                 : 'text-muted-foreground hover:bg-slate-100 dark:hover:bg-zinc-800'
             }`}
           >
-            <LayoutDashboard size={20} /> Quản lý bài học
+            <LayoutDashboard size={20} /> Manage Lessons
           </button>
           <button 
             onClick={() => setActiveTab('importer')}
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
                 : 'text-muted-foreground hover:bg-slate-100 dark:hover:bg-zinc-800'
             }`}
           >
-            <Sparkles size={20} /> AI Tạo bài học
+            <Sparkles size={20} /> AI Lesson Creator
           </button>
         </nav>
 
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
           onClick={logout}
           className="mt-auto flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all font-medium"
         >
-          <LogOut size={20} /> Đăng xuất
+          <LogOut size={20} /> Logout
         </button>
       </div>
 
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
                 onClick={() => setPreviewCourse(null)}
                 className="flex items-center gap-2 bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded-xl font-bold transition-colors"
               >
-                <X size={18} /> Đóng Xem Trước
+                <X size={18} /> Close Preview
               </button>
             </div>
             <InteractiveLesson lessonData={previewCourse} onBack={() => setPreviewCourse(null)} />
@@ -142,14 +142,14 @@ export default function AdminDashboard() {
           <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Danh sách Khóa học</h1>
-                <p className="text-muted-foreground text-sm sm:text-base">Quản lý toàn bộ dữ liệu đang có trên Firebase</p>
+                <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Lesson List</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">Manage all data currently on Firebase</p>
               </div>
               <button 
                 onClick={() => handleOpenEditor(null)}
                 className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
               >
-                <Plus size={18} /> Thêm mới
+                <Plus size={18} /> Add New
               </button>
             </div>
 
@@ -163,10 +163,10 @@ export default function AdminDashboard() {
                 <table className="w-full min-w-[620px] text-left">
                   <thead className="bg-slate-50 dark:bg-zinc-950/50 border-b border-border/50 text-muted-foreground text-sm font-semibold uppercase tracking-wider">
                     <tr>
-                      <th className="px-6 py-4">Tên bài học (Title)</th>
+                      <th className="px-6 py-4">Lesson Title</th>
                       <th className="px-6 py-4">ID</th>
-                      <th className="px-6 py-4">Thống kê</th>
-                      <th className="px-6 py-4 text-right">Thao tác</th>
+                      <th className="px-6 py-4">Statistics</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
@@ -182,24 +182,24 @@ export default function AdminDashboard() {
                           {course.id}
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
-                          <span className="font-semibold">{course.vocabulary?.length || 0}</span> từ vựng
+                          <span className="font-semibold">{course.vocabulary?.length || 0}</span> words
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <button 
                             onClick={() => setPreviewCourse(course)}
-                            className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors" title="Xem trước"
+                            className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors" title="Preview"
                           >
                             <Eye size={18} />
                           </button>
                           <button 
                             onClick={() => handleOpenEditor(course)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Sửa"
+                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Edit"
                           >
                             <Edit size={18} />
                           </button>
                           <button 
                             onClick={() => handleDelete(course.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" title="Xóa"
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" title="Delete"
                           >
                             <Trash2 size={18} />
                           </button>
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
                     {courses.length === 0 && (
                       <tr>
                         <td colSpan="4" className="px-6 py-10 text-center text-muted-foreground">
-                          Không có bài học nào trên Firebase.
+                          No lessons found on Firebase.
                         </td>
                       </tr>
                     )}
@@ -221,8 +221,8 @@ export default function AdminDashboard() {
         ) : activeTab === 'importer' ? (
           <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="mb-6">
-              <h1 className="text-3xl font-extrabold mb-2">AI Tạo Bài Học (Trực Tiếp Lên Firebase)</h1>
-              <p className="text-muted-foreground">Các bài học tạo ra tại đây sẽ được lưu thẳng lên Đám mây để học sinh sử dụng.</p>
+              <h1 className="text-3xl font-extrabold mb-2">AI Lesson Creator (Direct to Firebase)</h1>
+              <p className="text-muted-foreground">Lessons created here will be saved directly to the Cloud for student use.</p>
             </div>
             
             <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl shadow-sm border border-border/50">

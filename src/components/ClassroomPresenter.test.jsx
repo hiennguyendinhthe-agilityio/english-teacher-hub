@@ -7,7 +7,7 @@ import { LanguageProvider } from '../context/LanguageContext';
 const mockLesson = {
   title: 'Unit 1: Presenter Test',
   vocabulary: [
-    { word: 'teacher', transcription: '/ˈtiː.tʃər/', type: '(n)', meaning: 'giáo viên' }
+    { word: 'teacher', transcription: '/ˈtiː.tʃər/', type: '(n)', meaning: 'teacher' }
   ],
   grammar: [
     {
@@ -32,7 +32,7 @@ describe('ClassroomPresenter Component', () => {
     expect(screen.getByText(/TV \/ Projector Mode/i)).toBeInTheDocument();
 
     // Click Next slide
-    const nextBtn = screen.getByText(/Slide Tiếp|Next Slide/i);
+    const nextBtn = screen.getByText(/Next Slide/i);
     fireEvent.click(nextBtn);
 
     // Should show the vocabulary word 'teacher'
@@ -50,7 +50,7 @@ describe('ClassroomPresenter Component', () => {
     const laserBtn = screen.getByText(/Laser/i);
     fireEvent.click(laserBtn);
 
-    const exitBtn = screen.getByTitle(/Thoát|Exit/i);
+    const exitBtn = screen.getByTitle(/Exit/i);
     fireEvent.click(exitBtn);
     expect(handleExit).toHaveBeenCalledTimes(1);
   });

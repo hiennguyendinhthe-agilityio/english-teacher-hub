@@ -47,8 +47,8 @@ function AppLayout() {
 
   useEffect(() => {
     const handleNetworkError = (e) => {
-      setNetworkErrorMsg(e.detail?.message || "Lỗi kết nối");
-      // Tự động tắt sau 5 giây
+      setNetworkErrorMsg(e.detail?.message || "Connection Error");
+      // Auto dismiss after 5 seconds
       setTimeout(() => setNetworkErrorMsg(""), 5000);
     };
     window.addEventListener("network_error", handleNetworkError);
@@ -178,8 +178,8 @@ function AppLayout() {
 }
 
 export default function App() {
-  // Tắt Splash Screen ở root level — áp dụng cho TẤT CẢ routes (/, /login, /admin)
-  // Dùng 200ms thay vì 700ms để ép splash tắt sớm hơn
+  // Dismiss Splash Screen at root level — applies to ALL routes (/, /login, /admin)
+  // Use 200ms instead of 700ms to force early splash dismissal
   useEffect(() => {
     const splash = document.getElementById('app-splash');
     if (!splash) return;

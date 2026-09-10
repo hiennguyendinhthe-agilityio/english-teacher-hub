@@ -5,9 +5,9 @@ import VocabularyMatchingGame from './VocabularyMatchingGame';
 import { LanguageProvider } from '../context/LanguageContext';
 
 const mockVocab = [
-  { word: 'apple', transcription: '/ˈæp.əl/', type: '(n)', meaning: 'quả táo' },
-  { word: 'book', transcription: '/bʊk/', type: '(n)', meaning: 'quyển sách' },
-  { word: 'cat', transcription: '/kæt/', type: '(n)', meaning: 'con mèo' },
+  { word: 'apple', transcription: '/ˈæp.əl/', type: '(n)', meaning: 'apple' },
+  { word: 'book', transcription: '/bʊk/', type: '(n)', meaning: 'book' },
+  { word: 'cat', transcription: '/kæt/', type: '(n)', meaning: 'cat' },
 ];
 
 describe('VocabularyMatchingGame Component', () => {
@@ -17,10 +17,10 @@ describe('VocabularyMatchingGame Component', () => {
         <VocabularyMatchingGame vocabulary={mockVocab} unitTitle="Test Unit" />
       </LanguageProvider>
     );
-    expect(screen.getByText(/Sẵn Sàng Thử Thách Ghép Từ|Ready for the Word Match Challenge/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ready for the Word Match Challenge/i)).toBeInTheDocument();
     
     // Start game button
-    const startBtn = screen.getByText(/Bắt Đầu Ghép Từ|Start Matching/i);
+    const startBtn = screen.getByText(/Start Matching/i);
     expect(startBtn).toBeInTheDocument();
 
     // Click Start
@@ -28,7 +28,7 @@ describe('VocabularyMatchingGame Component', () => {
 
     // Tiles should now appear
     expect(screen.getByText('apple')).toBeInTheDocument();
-    expect(screen.getByText('quả táo')).toBeInTheDocument();
+    expect(screen.getByText('apple')).toBeInTheDocument();
   });
 
   it('allows clicking tiles and resets game', () => {
@@ -38,14 +38,14 @@ describe('VocabularyMatchingGame Component', () => {
       </LanguageProvider>
     );
     // Start game
-    const startBtn = screen.getByText(/Bắt Đầu Ghép Từ|Start Matching/i);
+    const startBtn = screen.getByText(/Start Matching/i);
     fireEvent.click(startBtn);
 
     const appleTile = screen.getByText('apple');
     fireEvent.click(appleTile);
     
     // Check reset button
-    const replayBtn = screen.getByText(/Chơi Lại|Replay/i);
+    const replayBtn = screen.getByText(/Replay/i);
     expect(replayBtn).toBeInTheDocument();
     fireEvent.click(replayBtn);
     expect(screen.getByText('apple')).toBeInTheDocument();

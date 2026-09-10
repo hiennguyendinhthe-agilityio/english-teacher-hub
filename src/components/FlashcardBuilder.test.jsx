@@ -21,7 +21,7 @@ describe('FlashcardBuilder Component', () => {
         <FlashcardBuilder />
       </LanguageProvider>
     );
-    expect(screen.getByText('Tạo Thẻ Từ Vựng & Flashcard 3D')).toBeInTheDocument();
+    expect(screen.getByText('3D Flashcard & Vocabulary Creator')).toBeInTheDocument();
     const select = document.querySelector('select');
     expect(select).toBeInTheDocument();
   });
@@ -38,7 +38,7 @@ describe('FlashcardBuilder Component', () => {
       const items = screen.getAllByText(/activity/i);
       expect(items.length).toBeGreaterThan(0);
       // Flip buttons and navigation should be present
-      const flipBtns = screen.getAllByText(/Lật Thẻ|Bấm để lật/i);
+      const flipBtns = screen.getAllByText(/Flip Card|Tap to flip/i);
       expect(flipBtns.length).toBeGreaterThan(0);
     });
   });
@@ -54,7 +54,7 @@ describe('FlashcardBuilder Component', () => {
       expect(screen.getByText(/\/ 22/i)).toBeInTheDocument();
     });
 
-    const nextBtn = screen.getByTitle('Thẻ Tiếp');
+    const nextBtn = screen.getByTitle('Next');
     nextBtn.click();
 
     await waitFor(() => {

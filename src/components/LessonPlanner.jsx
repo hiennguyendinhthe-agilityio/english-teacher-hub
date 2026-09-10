@@ -83,7 +83,7 @@ export default function LessonPlanner() {
         <Card className="xl:col-span-4 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-indigo-100 dark:border-indigo-900/50 shadow-sm h-fit">
           <CardHeader>
             <CardTitle className="text-xl text-indigo-700 dark:text-indigo-400">{t('plannerParams')}</CardTitle>
-            <CardDescription>Cấu hình các tham số để AI tạo giáo án phù hợp nhất.</CardDescription>
+            <CardDescription>Configure parameters for AI to generate the best lesson plan.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">

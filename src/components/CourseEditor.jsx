@@ -36,7 +36,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim() || !courseId.trim()) {
-      alert("Vui lòng nhập đầy đủ Tên và ID Khóa học!");
+      alert("Please enter both Course Name and ID!");
       return;
     }
 
@@ -48,7 +48,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
       parsedPhonetics = JSON.parse(phoneticsStr);
       parsedPractice = JSON.parse(practiceStr);
     } catch (err) {
-      alert("Lỗi cú pháp JSON ở phần Ngữ Pháp, Phát Âm hoặc Bài Tập! Vui lòng kiểm tra lại.");
+      alert("JSON syntax error in Grammar, Pronunciation or Exercises! Please check again.");
       return;
     }
 
@@ -73,18 +73,18 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
           </Button>
           <div>
             <h1 className="text-3xl font-extrabold mb-1">
-              {isEditing ? 'Chỉnh Sửa Bài Học' : 'Thêm Bài Học Mới'}
+              {isEditing ? 'Edit Lesson' : 'Add New Lesson'}
             </h1>
-            <p className="text-muted-foreground">Điền thông tin chi tiết cho bài học</p>
+            <p className="text-muted-foreground">Enter lesson details</p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={onCancel} className="rounded-xl h-12 px-6">Hủy</Button>
+          <Button variant="outline" onClick={onCancel} className="rounded-xl h-12 px-6">Cancel</Button>
           <Button 
             onClick={handleSubmit} 
             className="rounded-xl h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/25 flex items-center gap-2"
           >
-            <Save size={18} /> Lưu Bài Học
+            <Save size={18} /> Save Lesson
           </Button>
         </div>
       </div>
@@ -96,12 +96,12 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
           <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold flex items-center gap-2 mb-1">
-                <Sparkles size={24} className="text-yellow-300" /> Tạo tự động bằng Trí Tuệ Nhân Tạo?
+                <Sparkles size={24} className="text-yellow-300" /> Auto-generate with AI?
               </h2>
-              <p className="text-emerald-50 text-sm">Chỉ cần tải lên 1 bức ảnh sách giáo khoa hoặc gõ 1 câu lệnh, AI sẽ tự động điền toàn bộ Form này cho bạn!</p>
+              <p className="text-emerald-50 text-sm">Just upload a textbook image or type a prompt, and AI will automatically fill this entire form for you!</p>
             </div>
             <Button type="button" onClick={onSwitchToAI} className="bg-white text-emerald-600 hover:bg-slate-50 font-bold whitespace-nowrap px-6">
-              Chuyển sang AI ngay
+              Switch to AI now
             </Button>
           </div>
         )}
@@ -109,12 +109,12 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
         {/* Basic Info */}
         <Card className="border-border/50 shadow-sm overflow-hidden bg-white dark:bg-zinc-900">
           <div className="bg-slate-50 dark:bg-zinc-950/50 px-6 py-4 border-b border-border/50">
-            <h2 className="text-lg font-bold">1. Thông tin chung</h2>
+            <h2 className="text-lg font-bold">1. General Information</h2>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold ml-1">Mã bài học (ID) <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold ml-1">Lesson ID <span className="text-red-500">*</span></label>
                 <Input 
                   placeholder="VD: unit-6-community" 
                   value={courseId} 
@@ -123,10 +123,10 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
                   className="h-12 bg-slate-50 dark:bg-zinc-950"
                   required
                 />
-                <p className="text-xs text-muted-foreground ml-1">Dùng làm ID lưu trên hệ thống, không chứa khoảng trắng.</p>
+                <p className="text-xs text-muted-foreground ml-1">Used as system ID, no spaces allowed.</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold ml-1">Tên bài học (Title) <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold ml-1">Lesson Title <span className="text-red-500">*</span></label>
                 <Input 
                   placeholder="VD: Unit 6: COMMUNITY SERVICE" 
                   value={title} 
@@ -142,9 +142,9 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
         {/* Vocabulary Builder */}
         <Card className="border-border/50 shadow-sm overflow-hidden bg-white dark:bg-zinc-900">
           <div className="bg-slate-50 dark:bg-zinc-950/50 px-6 py-4 border-b border-border/50 flex justify-between items-center">
-            <h2 className="text-lg font-bold">2. Danh sách Từ Vựng</h2>
+            <h2 className="text-lg font-bold">2. Vocabulary List</h2>
             <Button type="button" onClick={handleAddVocab} size="sm" className="h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1">
-              <Plus size={16} /> Thêm từ mới
+              <Plus size={16} /> Add new word
             </Button>
           </div>
           <CardContent className="p-6 space-y-4">
@@ -156,7 +156,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
                 
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground">Từ tiếng Anh</label>
+                    <label className="text-xs font-semibold text-muted-foreground">English Word</label>
                     <Input 
                       placeholder="activity" 
                       value={vocab.word} 
@@ -164,7 +164,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground">Loại từ</label>
+                    <label className="text-xs font-semibold text-muted-foreground">Word Type</label>
                     <Input 
                       placeholder="(n), (v), (adj)..." 
                       value={vocab.type} 
@@ -172,7 +172,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground">Phiên âm</label>
+                    <label className="text-xs font-semibold text-muted-foreground">Phonetics</label>
                     <Input 
                       placeholder="/ækˈtɪv.ɪ.ti/" 
                       value={vocab.transcription} 
@@ -180,9 +180,9 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground">Nghĩa tiếng Việt</label>
+                    <label className="text-xs font-semibold text-muted-foreground">Meaning</label>
                     <Input 
-                      placeholder="hoạt động" 
+                      placeholder="activity" 
                       value={vocab.meaning} 
                       onChange={(e) => handleVocabChange(index, 'meaning', e.target.value)} 
                     />
@@ -206,8 +206,8 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
         {/* Practice (Advanced JSON) */}
         <Card className="border-border/50 shadow-sm overflow-hidden bg-white dark:bg-zinc-900">
           <div className="bg-slate-50 dark:bg-zinc-950/50 px-6 py-4 border-b border-border/50">
-            <h2 className="text-lg font-bold">3. Bài Tập 4 Kỹ năng (Advanced JSON)</h2>
-            <p className="text-xs text-muted-foreground mt-1">Hỗ trợ các dạng bài Đọc hiểu, Viết tự luận, Trắc nghiệm. Nên dùng AI để sinh tự động.</p>
+            <h2 className="text-lg font-bold">3. 4-Skill Exercises (Advanced JSON)</h2>
+            <p className="text-xs text-muted-foreground mt-1">Supports Reading, Writing, and Multiple Choice. AI auto-generation recommended.</p>
           </div>
           <CardContent className="p-6 space-y-4">
             <Textarea 
@@ -221,12 +221,12 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
         {/* Grammar & Phonetics (Advanced JSON) */}
         <Card className="border-border/50 shadow-sm overflow-hidden bg-white dark:bg-zinc-900">
           <div className="bg-slate-50 dark:bg-zinc-950/50 px-6 py-4 border-b border-border/50">
-            <h2 className="text-lg font-bold">4. Ngữ Pháp & Phát Âm (Nâng cao)</h2>
-            <p className="text-xs text-muted-foreground mt-1">Cấu trúc dữ liệu JSON thô. Khuyến cáo nên dùng AI để sinh tự động phần này.</p>
+            <h2 className="text-lg font-bold">4. Grammar & Pronunciation (Advanced)</h2>
+            <p className="text-xs text-muted-foreground mt-1">Raw JSON data structure. AI auto-generation recommended for this section.</p>
           </div>
           <CardContent className="p-6 space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Cấu trúc Ngữ Pháp (JSON Array)</label>
+              <label className="text-sm font-semibold text-foreground">Grammar Structure (JSON Array)</label>
               <Textarea 
                 value={grammarStr}
                 onChange={(e) => setGrammarStr(e.target.value)}
@@ -234,7 +234,7 @@ export default function CourseEditor({ initialData, onSave, onCancel, onSwitchTo
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Cấu trúc Phát Âm (JSON Array)</label>
+              <label className="text-sm font-semibold text-foreground">Pronunciation Structure (JSON Array)</label>
               <Textarea 
                 value={phoneticsStr}
                 onChange={(e) => setPhoneticsStr(e.target.value)}

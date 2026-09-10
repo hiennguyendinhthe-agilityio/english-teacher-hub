@@ -30,7 +30,7 @@ vi.mock('@/components/ui/tabs', () => ({
 const mockLessonData = {
   title: "Unit 1: Test Lesson",
   vocabulary: [
-    { word: "activity", transcription: "/ækˈtɪv.ɪ.ti/", type: "(n)", meaning: "hoạt động" }
+    { word: "activity", transcription: "/ækˈtɪv.ɪ.ti/", type: "(n)", meaning: "activity" }
   ],
   grammar: [
     {
