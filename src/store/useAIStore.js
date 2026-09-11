@@ -44,8 +44,12 @@ export const useAIStore = create(
         gradingScale: 'IELTS Writing Band (1.0 - 9.0)'
       },
       essayFeedback: null,
+      pendingEssaySave: null, // Holds { title, content, category_ids } when user was guest
       setEssayParams: (params) => set((state) => ({ essayParams: { ...state.essayParams, ...params } })),
       setEssayFeedback: (feedback) => set({ essayFeedback: feedback }),
+      setPendingEssaySave: (data) => set({ pendingEssaySave: data }),
+      clearPendingEssaySave: () => set({ pendingEssaySave: null }),
+
 
       // --- AI Importer State ---
       importerParams: {

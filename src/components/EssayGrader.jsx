@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { PenTool, Sparkles, CheckCircle2, AlertCircle, AlertTriangle, TrendingUp, RefreshCw, BookOpen, FileText, CheckSquare, Zap, Eye, Target, ListChecks, PenLine, GraduationCap, ArrowRight, Lightbulb, Dices, Award, Check } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { PenTool, Sparkles, CheckCircle2, AlertCircle, AlertTriangle, TrendingUp, RefreshCw, BookOpen, FileText, CheckSquare, Zap, Eye, Target, ListChecks, PenLine, GraduationCap, ArrowRight, Lightbulb, Dices, Award, Check, Loader2 } from 'lucide-react';
+import { useAuth } from '@clerk/clerk-react';
 import { gradeEssay } from '../services/aiService';
+import { createPost, getCategories } from '../services/postService';
 import { useLanguage } from '../context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import AILoadingOverlay from './AILoadingOverlay';
+import EssayHistory from './EssayHistory';
 import { useAIStore } from '../store/useAIStore';
 import { cn } from '@/lib/utils';
 
@@ -48,18 +51,26 @@ const WRITING_PROMPTS = [
 
 export default function EssayGrader() {
   const { t } = useLanguage();
+  const { isSignedIn, getToken } = useAuth();
   
   // Connect to Zustand store
   const {
     essayParams,
     setEssayParams,
     essayFeedback: feedback,
-    setEssayFeedback: setFeedback
+    setEssayFeedback: setFeedback,
+    setPendingEssaySave
   } = useAIStore();
 
   const { essayText, gradingScale } = essayParams;
 
+  const [activeSubTab, setActiveSubTab] = useState('write'); // 'write', 'myEssays', 'feed'
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
 
   const ESSAY_STEPS = [
     { icon: FileText,   labelKey: 'aiStepReadEssay' },
@@ -70,6 +81,25 @@ export default function EssayGrader() {
 
   const wordCount = essayText.trim() ? essayText.trim().split(/\s+/).length : 0;
   const sentenceCount = essayText.trim() ? essayText.split(/[.!?]+/).filter(Boolean).length : 0;
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setCategories([]);
+      return;
+    }
+
+    getCategories(getToken)
+      .then((data) => setCategories(data.items || []))
+      .catch((err) => console.error('Failed to load essay categories:', err));
+  }, [getToken, isSignedIn]);
+
+  const toggleCategory = (categoryId) => {
+    setSelectedCategoryIds((currentIds) => (
+      currentIds.includes(categoryId)
+        ? currentIds.filter((id) => id !== categoryId)
+        : [...currentIds, categoryId]
+    ));
+  };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -97,6 +127,41 @@ export default function EssayGrader() {
     setFeedback(null);
   };
 
+  const handleSaveEssay = async () => {
+    if (!essayText.trim()) return;
+    const fallbackTitle = essayText.trim().split('\n')[0].replace(/^Topic:\s*"?|"?$/g, '').slice(0, 50) || 'IELTS Writing Essay';
+
+    if (!isSignedIn) {
+      // Guest flow: Store pending save and redirect to login
+      setPendingEssaySave({
+        title: fallbackTitle,
+        content: essayText,
+        category_ids: selectedCategoryIds,
+        evaluation: feedback,
+      });
+      window.location.href = '/login';
+      return;
+    }
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await createPost(getToken, {
+        title: fallbackTitle,
+        content: essayText,
+        category_ids: selectedCategoryIds,
+        evaluation: feedback,
+      });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 4000);
+    } catch (err) {
+      console.error("Save essay error:", err);
+      setSaveError(err.message || t('essaySaveError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const getScoreColor = (score) => {
     const s = parseFloat(score);
     if (isNaN(s)) return 'text-amber-500';
@@ -115,7 +180,7 @@ export default function EssayGrader() {
         estimatedSeconds={14}
       />
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 mb-2 text-foreground flex-wrap">
           <GraduationCap className="text-amber-500 shrink-0" size={32} /> 
           <span>{t('essayTitle')}</span>
@@ -125,6 +190,58 @@ export default function EssayGrader() {
         </p>
       </div>
 
+      {/* Sub Navigation Tabs */}
+      <div className="flex items-center gap-2 mb-8 border-b border-border/60 pb-3 overflow-x-auto">
+        <Button
+          variant={activeSubTab === 'write' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveSubTab('write')}
+          className="rounded-xl font-bold gap-2 text-xs sm:text-sm cursor-pointer shadow-xs"
+        >
+          <PenLine size={16} />
+          {t('essayTabWrite')}
+        </Button>
+        <Button
+          variant={activeSubTab === 'myEssays' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveSubTab('myEssays')}
+          className="rounded-xl font-bold gap-2 text-xs sm:text-sm cursor-pointer shadow-xs"
+        >
+          <BookOpen size={16} />
+          {t('essayTabMyEssays')}
+        </Button>
+        <Button
+          variant={activeSubTab === 'feed' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveSubTab('feed')}
+          className="rounded-xl font-bold gap-2 text-xs sm:text-sm cursor-pointer shadow-xs"
+        >
+          <Sparkles size={16} />
+          {t('essayTabFeed')}
+        </Button>
+      </div>
+
+      {activeSubTab === 'myEssays' && (
+        <EssayHistory
+          mode="myEssays"
+          onSelectEssay={(post) => {
+            setEssayParams({ essayText: post.content });
+            setActiveSubTab('write');
+          }}
+        />
+      )}
+
+      {activeSubTab === 'feed' && (
+        <EssayHistory
+          mode="feed"
+          onSelectEssay={(post) => {
+            setEssayParams({ essayText: post.content });
+            setActiveSubTab('write');
+          }}
+        />
+      )}
+
+      {activeSubTab === 'write' && (
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Input Form Column */}
         <Card className="xl:col-span-5 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-amber-100 dark:border-amber-900/50 shadow-sm h-fit">
@@ -226,6 +343,74 @@ export default function EssayGrader() {
         <div className="xl:col-span-7">
           {feedback ? (
             <div className="space-y-6">
+              {/* Save Essay Action Banner */}
+              <Card className="border-amber-200/60 dark:border-amber-900/40 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-3xl p-5 shadow-md">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-base text-foreground flex items-center gap-2">
+                      <Sparkles className="text-amber-500 w-5 h-5" />
+                      {t('essaySaveBtn')}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {isSignedIn ? t('essayParamsDesc') : t('essayLoginToSave')}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    {saveSuccess ? (
+                      <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 py-2 px-4 rounded-xl gap-2 font-bold text-sm">
+                        <CheckCircle2 size={16} />
+                        {t('essaySavedSuccess')}
+                      </Badge>
+                    ) : (
+                      <Button
+                        onClick={handleSaveEssay}
+                        disabled={saving}
+                        className="rounded-2xl font-bold gap-2 shadow-lg shadow-amber-500/20 bg-amber-600 hover:bg-amber-700 text-white cursor-pointer w-full sm:w-auto"
+                      >
+                        {saving ? <Loader2 size={16} className="animate-spin" /> : <Award size={16} />}
+                        {saving ? t('essaySaving') : t('essaySaveBtn')}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {saveError && (
+                  <div className="mt-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <span>{saveError}</span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={handleSaveEssay} className="h-7 text-xs font-bold">
+                      {t('essayRetry')}
+                    </Button>
+                  </div>
+                )}
+                {categories.length > 0 && (
+                  <div className="mt-4 rounded-2xl border border-amber-200/70 bg-amber-50/50 p-3 dark:border-amber-900/50 dark:bg-amber-950/20">
+                    <p className="mb-2 text-xs font-bold text-foreground">{t('essaySelectCategory')}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((category) => {
+                        const isSelected = selectedCategoryIds.includes(category.id);
+                        return (
+                          <Button
+                            key={category.id}
+                            type="button"
+                            size="sm"
+                            variant={isSelected ? 'default' : 'outline'}
+                            onClick={() => toggleCategory(category.id)}
+                            className="h-8 rounded-full text-xs"
+                            aria-pressed={isSelected}
+                          >
+                            {category.name}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </Card>
+
               {/* Overall Score & Criteria Overview */}
               <Card className="bg-white dark:bg-secondary/20 shadow-md border-amber-100 dark:border-amber-900/30 overflow-hidden">
                 <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-b border-amber-100 dark:border-amber-900/30 p-6 text-center">
@@ -281,7 +466,7 @@ export default function EssayGrader() {
                       </div>
                     ))}
                     {!(feedback.grammarErrors?.length || feedback.grammarCorrections?.length) && (
-                      <div className="p-4 text-center text-xs text-muted-foreground">Không phát hiện lỗi ngữ pháp nghiêm trọng! 🎉</div>
+                      <div className="p-4 text-center text-xs text-muted-foreground">{t('essayNoGrammarErrors')}</div>
                     )}
                   </CardContent>
                 </Card>
@@ -307,7 +492,7 @@ export default function EssayGrader() {
                       </div>
                     ))}
                     {!(feedback.vocabularyImprovements?.length || feedback.vocabularySuggestions?.length) && (
-                      <div className="p-4 text-center text-xs text-muted-foreground">Vốn từ vựng sử dụng rất tốt và tự nhiên! ✨</div>
+                      <div className="p-4 text-center text-xs text-muted-foreground">{t('essayGreatVocab')}</div>
                     )}
                   </CardContent>
                 </Card>
@@ -340,6 +525,7 @@ export default function EssayGrader() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
