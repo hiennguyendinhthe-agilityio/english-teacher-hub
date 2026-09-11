@@ -78,7 +78,7 @@ describe('AIImporter Component', () => {
 
     expect(screen.getByText(/Unit 6: COMMUNITY SERVICE/i)).toBeInTheDocument();
     expect(screen.getAllByText(/volunteer/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Vào Học Bài Giảng|Start Interactive Lesson/i)).toBeInTheDocument();
+    expect(screen.getByText(/Preview Lesson|Vào Học Bài Giảng/i)).toBeInTheDocument();
     expect(screen.getByText(/Trình Chiếu TV|Classroom TV Presenter/i)).toBeInTheDocument();
   });
 });

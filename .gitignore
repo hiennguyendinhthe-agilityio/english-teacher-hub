@@ -43,3 +43,4 @@ yarn-error.log*
 pnpm-debug.log*
 vitest.config.ts.timestamp*
 vite.config.js.timestamp*
+.env.local

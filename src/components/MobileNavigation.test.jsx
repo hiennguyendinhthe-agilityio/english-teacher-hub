@@ -1,22 +1,33 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { LanguageProvider } from '../context/LanguageContext';
+
+// Wrap with both LanguageProvider and MemoryRouter since
+// Header and Sidebar use react-router <Link> components
+const Providers = ({ children }) => (
+  <MemoryRouter>
+    <LanguageProvider>
+      {children}
+    </LanguageProvider>
+  </MemoryRouter>
+);
 
 describe('Mobile Navigation Component Tests', () => {
   it('renders Hamburger button on Header and triggers onOpenMobileMenu', () => {
     const handleOpenMobile = vi.fn();
     render(
-      <LanguageProvider>
-        <Header 
-          isDarkMode={false} 
-          setIsDarkMode={() => {}} 
-          openSettings={() => {}} 
-          onOpenMobileMenu={handleOpenMobile} 
+      <Providers>
+        <Header
+          isDarkMode={false}
+          setIsDarkMode={() => {}}
+          openSettings={() => {}}
+          onOpenMobileMenu={handleOpenMobile}
         />
-      </LanguageProvider>
+      </Providers>
     );
 
     const hamburgerBtn = screen.getByRole('button', { name: /open mobile menu/i });
@@ -30,7 +41,7 @@ describe('Mobile Navigation Component Tests', () => {
     const handleSetActiveTab = vi.fn();
 
     render(
-      <LanguageProvider>
+      <Providers>
         <Sidebar
           activeTab="dashboard"
           setActiveTab={handleSetActiveTab}
@@ -40,7 +51,7 @@ describe('Mobile Navigation Component Tests', () => {
           isMobileOpen={true}
           setIsMobileOpen={handleSetMobileOpen}
         />
-      </LanguageProvider>
+      </Providers>
     );
 
     const closeBtn = screen.getByRole('button', { name: /close menu/i });
@@ -54,7 +65,7 @@ describe('Mobile Navigation Component Tests', () => {
     const handleSetActiveTab = vi.fn();
 
     render(
-      <LanguageProvider>
+      <Providers>
         <Sidebar
           activeTab="dashboard"
           setActiveTab={handleSetActiveTab}
@@ -64,7 +75,7 @@ describe('Mobile Navigation Component Tests', () => {
           isMobileOpen={true}
           setIsMobileOpen={handleSetMobileOpen}
         />
-      </LanguageProvider>
+      </Providers>
     );
 
     const flashcardButtons = screen.getAllByRole('button', { name: /flashcard/i });

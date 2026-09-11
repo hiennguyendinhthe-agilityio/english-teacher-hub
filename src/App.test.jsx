@@ -3,9 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 import App from './App';
 
-vi.mock('./context/AuthContext', () => ({
-  AuthProvider: ({ children }) => <>{children}</>,
-  useAuth: () => ({ currentUser: null, login: vi.fn(), logout: vi.fn() })
+// Mock Clerk auth hooks used by App.jsx and ClerkSync
+vi.mock('@clerk/clerk-react', () => ({
+  useAuth: () => ({ isLoaded: true, isSignedIn: false, getToken: vi.fn() }),
+  useUser: () => ({ user: null }),
+  ClerkProvider: ({ children }) => <>{children}</>,
+  SignIn: () => <div>Sign In</div>,
+  SignUp: () => <div>Sign Up</div>,
+  UserButton: () => <div>UserButton</div>,
 }));
 
 describe('App Main Component with Lazy Loading & Suspense', () => {
@@ -21,8 +26,9 @@ describe('App Main Component with Lazy Loading & Suspense', () => {
     fireEvent.click(courseNavBtns[0]);
 
     await waitFor(() => {
-      expect(screen.getByText(/Explore interactive Units/i)).toBeInTheDocument();
-    });
+      // cmSub i18n key: "Explore interactive lesson units: Vocabulary, Grammar, Games & Practice."
+      expect(screen.getByText(/Explore interactive lesson units/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 
   it('navigates to Flashcard tab when clicked and resolves lazy component', async () => {

@@ -2,6 +2,26 @@ import '@testing-library/jest-dom';
 import { afterEach, vi } from 'vitest';
 import { useAIStore } from './store/useAIStore';
 
+// Global mock for Clerk authentication
+vi.mock('@clerk/clerk-react', () => ({
+  useAuth: () => ({
+    isSignedIn: false,
+    isLoaded: true,
+    getToken: vi.fn().mockResolvedValue('mock-token'),
+    signOut: vi.fn(),
+  }),
+  useUser: () => ({
+    isSignedIn: false,
+    isLoaded: true,
+    user: null,
+  }),
+  UserButton: () => null,
+  SignInButton: ({ children }) => children || null,
+  SignIn: () => null,
+  ClerkProvider: ({ children }) => children || null,
+}));
+
+
 // Mock window.matchMedia and scrollTo for JSDOM
 if (typeof window !== 'undefined') {
   if (!window.matchMedia) {
