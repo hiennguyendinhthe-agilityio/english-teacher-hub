@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import { syncUser } from './services/authService';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
@@ -20,25 +22,77 @@ const TeacherPlanner = lazy(() => import('./components/TeacherPlanner'));
 const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import AIChatBot from './components/AIChatBot';
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
-import { AlertCircle, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, X, Sparkles } from "lucide-react";
+import { createPost } from './services/postService';
+import { useAIStore } from './store/useAIStore';
+import { useThemeStore } from './store/useThemeStore';
+import { useLanguage } from './context/LanguageContext';
 
-function NetworkErrorToast({ message, onClose }) {
+function AppToast({ message, isSuccess = false, onClose }) {
   if (!message) return null;
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-red-600 text-white px-4 py-3 rounded-lg shadow-xl animate-in slide-in-from-top-5 fade-in duration-300">
-      <AlertCircle className="w-5 h-5 shrink-0" />
-      <span className="text-sm font-medium">{message}</span>
-      <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-md transition-colors ml-2">
+    <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[250] flex items-center gap-3 text-white px-5 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top-5 fade-in duration-300 font-medium text-sm backdrop-blur-md border ${
+      isSuccess ? "bg-emerald-600/95 border-emerald-400/40" : "bg-red-600/95 border-red-400/40"
+    }`}>
+      {isSuccess ? <Sparkles className="w-5 h-5 shrink-0 text-amber-300" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+      <span>{message}</span>
+      <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-lg transition-colors ml-2 cursor-pointer">
         <X className="w-4 h-4" />
       </button>
     </div>
   );
 }
 
+function ClerkSync() {
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { user: clerkUser } = useUser();
+  const { pendingEssaySave, clearPendingEssaySave } = useAIStore();
+  const [toast, setToast] = useState(null);
+  const { t } = useLanguage();
+  
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      // 1. Sync User to local PostgreSQL (pass clerkUser for email extraction)
+      syncUser(getToken, clerkUser)
+        .then(async (user) => {
+          console.log('✅ User synced with FastAPI backend:', user);
+          localStorage.setItem('db_role', user.role || 'student');
+          
+          // 2. Auto-save pending essay if present
+          if (pendingEssaySave) {
+            try {
+              await createPost(getToken, {
+                title: pendingEssaySave.title || 'My Essay',
+                content: pendingEssaySave.content,
+                category_ids: pendingEssaySave.category_ids || [],
+                evaluation: pendingEssaySave.evaluation || null,
+              });
+              clearPendingEssaySave();
+              setToast({ message: t('essayAutoSaveNotice'), isSuccess: true });
+            } catch (err) {
+              console.error('❌ Failed to auto-save essay:', err);
+              setToast({ message: t('essaySaveError'), isSuccess: false });
+            }
+          }
+        })
+        .catch(err => console.error('❌ Failed to sync user:', err));
+    }
+  }, [isLoaded, isSignedIn, getToken]);
+
+  if (!toast) return null;
+  return (
+    <AppToast 
+      message={toast.message} 
+      isSuccess={toast.isSuccess} 
+      onClose={() => setToast(null)} 
+    />
+  );
+}
+
 
 function AppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme } = useThemeStore();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -146,7 +200,7 @@ function AppLayout() {
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header
           isDarkMode={isDarkMode}
-          setIsDarkMode={setIsDarkMode}
+          setIsDarkMode={toggleTheme}
           openSettings={() => setIsSettingsOpen(true)}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         />
@@ -172,7 +226,7 @@ function AppLayout() {
       <PWAInstallPrompt />
 
       {/* Network Error Toast */}
-      <NetworkErrorToast message={networkErrorMsg} onClose={() => setNetworkErrorMsg("")} />
+      <AppToast message={networkErrorMsg} onClose={() => setNetworkErrorMsg("")} />
     </div>
   );
 }
@@ -195,6 +249,7 @@ export default function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
+          <ClerkSync />
           <Routes>
             <Route path="/" element={<AppLayout />} />
             <Route path="/login/*" element={<Login />} />

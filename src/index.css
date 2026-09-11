@@ -84,3 +84,66 @@
 .glass {
   @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm dark:bg-black/50 dark:border-white/10;
 }
+
+/* Clerk Authentication Dark Mode Parity */
+.dark .cl-card {
+  background-color: rgb(24 24 27 / 0.92) !important;
+  color: rgb(244 244 245) !important;
+}
+
+.dark .cl-headerTitle {
+  color: rgb(244 244 245) !important;
+}
+
+.dark .cl-headerSubtitle {
+  color: rgb(161 161 170) !important;
+}
+
+.dark .cl-footer {
+  background-color: rgb(24 24 27 / 0.95) !important;
+  background-image: none !important;
+  border-top: 1px solid rgb(255 255 255 / 0.08) !important;
+}
+
+.dark .cl-footerAction,
+.dark .cl-footerActionText {
+  color: rgb(161 161 170) !important;
+  background-color: transparent !important;
+}
+
+.dark .cl-footerActionLink {
+  color: rgb(129 140 248) !important;
+}
+
+.dark .cl-footerPagesLink {
+  color: rgb(113 113 122) !important;
+}
+
+.dark .cl-socialButtonsBlockButton {
+  background-color: rgb(39 39 42 / 0.6) !important;
+  border-color: rgb(63 63 70) !important;
+  color: rgb(244 244 245) !important;
+}
+
+.dark .cl-socialButtonsBlockButtonText {
+  color: rgb(244 244 245) !important;
+}
+
+.dark .cl-dividerLine {
+  background-color: rgb(63 63 70 / 0.8) !important;
+}
+
+.dark .cl-dividerText {
+  color: rgb(161 161 170) !important;
+}
+
+.dark .cl-formFieldLabel {
+  color: rgb(228 228 231) !important;
+}
+
+.dark .cl-formFieldInput {
+  background-color: rgb(9 9 11 / 0.8) !important;
+  border-color: rgb(63 63 70) !important;
+  color: rgb(244 244 245) !important;
+}
+

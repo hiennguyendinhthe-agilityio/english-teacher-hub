@@ -1,5 +1,7 @@
 import React from 'react';
 import { Sun, Moon, Key, Globe, Bell, Menu } from 'lucide-react';
+import { useUser, UserButton } from '@clerk/clerk-react';
+import { Link } from 'react-router-dom';
 import { getStoredApiKey } from '../services/aiService';
 import { useLanguage } from '../context/LanguageContext';
 import { LANGUAGES } from '../services/i18n';
@@ -10,6 +12,10 @@ import { cn } from '@/lib/utils';
 export default function Header({ isDarkMode, setIsDarkMode, openSettings, onOpenMobileMenu }) {
   const hasApiKey = Boolean(getStoredApiKey());
   const { lang, setLanguage, t } = useLanguage();
+  const { user, isSignedIn } = useUser();
+  const isAdmin = user?.publicMetadata?.role?.toLowerCase() === 'admin'
+    || localStorage.getItem('db_role')?.toLowerCase() === 'admin';
+
 
   return (
     <header className="h-[calc(4rem+env(safe-area-inset-top,0px))] sm:h-20 pt-[env(safe-area-inset-top,0px)] sm:pt-0 bg-background/85 backdrop-blur-xl border-b border-border px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 w-full shadow-xs transition-all">
@@ -97,13 +103,30 @@ export default function Header({ isDarkMode, setIsDarkMode, openSettings, onOpen
 
         <div className="w-[1px] h-5 sm:h-6 bg-border mx-0.5 sm:mx-1 hidden sm:block"></div>
 
-        {/* Student Avatar */}
-        <div 
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md hover:scale-105 transition-transform cursor-pointer shrink-0"
-          title="Học Sinh"
-        >
-          HS
-        </div>
+        {/* User Account / Avatar with Clerk */}
+        {isSignedIn ? (
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Badge variant="outline" className="border-purple-500/50 bg-purple-500/10 text-purple-600 dark:text-purple-400 font-extrabold text-[10px] hidden sm:inline-flex">
+                ADMIN
+              </Badge>
+            )}
+            <UserButton 
+              afterSignOutUrl="/" 
+              appearance={{
+                elements: {
+                  avatarBox: "w-8 h-8 sm:w-9 sm:h-9 shadow-md hover:scale-105 transition-transform"
+                }
+              }}
+            />
+          </div>
+        ) : (
+          <Button asChild size="sm" className="rounded-full h-8 sm:h-9 px-3.5 text-xs font-bold shadow-md shadow-primary/20">
+            <Link to="/login">
+              {t('loginBtn')}
+            </Link>
+          </Button>
+        )}
       </div>
     </header>
   );

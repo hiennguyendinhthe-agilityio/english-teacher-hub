@@ -11,8 +11,11 @@ import {
   FolderOpen,
   UploadCloud,
   X,
-  Calendar
+  Calendar,
+  ShieldCheck
 } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,6 +30,9 @@ export default function Sidebar({
   setIsMobileOpen = () => {}
 }) {
   const { t } = useLanguage();
+  const { user } = useUser();
+  const isAdmin = user?.publicMetadata?.role === 'admin';
+
 
   const navItems = [
     { id: 'dashboard', label: t('navDashboard'), icon: LayoutDashboard },
@@ -173,7 +179,19 @@ export default function Sidebar({
           </nav>
 
           {/* Mobile Settings Footer */}
-          <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] border-t border-border bg-secondary/20 shrink-0">
+          <div className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] border-t border-border bg-secondary/20 shrink-0 space-y-1.5">
+            {isAdmin && (
+              <Button
+                asChild
+                variant="outline"
+                className="w-full h-11 border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl font-bold flex items-center justify-start px-3.5 cursor-pointer shadow-xs"
+              >
+                <Link to="/admin">
+                  <ShieldCheck size={18} className="mr-3 shrink-0 text-purple-500" />
+                  <span className="text-sm font-bold">{t('navAdminPortal')}</span>
+                </Link>
+              </Button>
+            )}
             <Button
               variant="ghost"
               onClick={handleOpenSettings}
@@ -294,7 +312,23 @@ export default function Sidebar({
         </nav>
 
         {/* Desktop Settings Footer */}
-        <div className="p-3 border-t border-border bg-secondary/10">
+        <div className="p-3 border-t border-border bg-secondary/10 space-y-1.5">
+          {isAdmin && (
+            <Button
+              asChild
+              variant="outline"
+              className={cn(
+                "w-full h-11 border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl font-bold cursor-pointer transition-all shadow-xs",
+                isCollapsed ? "p-0 flex items-center justify-center" : "flex items-center justify-start px-3.5"
+              )}
+              title={isCollapsed ? t('navAdminPortal') : undefined}
+            >
+              <Link to="/admin">
+                <ShieldCheck size={19} className={cn(!isCollapsed && "mr-3 text-purple-500")} />
+                {!isCollapsed && <span className="text-sm font-bold">{t('navAdminPortal')}</span>}
+              </Link>
+            </Button>
+          )}
           <Button
             variant="ghost"
             onClick={handleOpenSettings}
