@@ -13,7 +13,18 @@ class ApiClient {
     };
 
     // Tự động kẹp JWT Token nếu có trong Local Storage
-    const token = localStorage.getItem('teacher_token');
+    let token = localStorage.getItem('teacher_token');
+    
+    // Bổ sung: Lấy token động từ Clerk nếu user đang đăng nhập bằng Clerk
+    if (window.Clerk && window.Clerk.session) {
+      try {
+        const clerkToken = await window.Clerk.session.getToken();
+        if (clerkToken) token = clerkToken;
+      } catch (e) {
+        console.warn("[ApiClient] Failed to get Clerk token:", e);
+      }
+    }
+
     if (token) {
       defaultHeaders['Authorization'] = `Bearer ${token}`;
     }
